@@ -40,6 +40,17 @@ var blockEls = /^(H[1-6]|HR|P|DIV|ADDRESS|PRE|FORM|TABLE|LI|OL|UL|TD|CAPTION|BLO
 var urlRegex = /^(https?|ftp|rmtp|mms):\/\/(([A-Z0-9][A-Z0-9_-]*)(\.[A-Z0-9][A-Z0-9_-]*)+)(:(\d+))?\/?/i;
 var protectRegex = /<(script|noscript|style)[\u0000-\uFFFF]*?<\/(script|noscript|style)>/g;
 
+		
+var dummy = new Element('p');
+var supportsContentEditable = false;
+
+if( dummy.contentEditable !== undefined )
+    supportsContentEditable = true;
+    
+dummy.destroy();
+delete dummy;
+
+
 this.MooEditable = new Class({
 
 	Implements: [Events, Options],
@@ -124,14 +135,27 @@ this.MooEditable = new Class({
 		this.textarea.addClass('mooeditable-textarea').setStyle('height', dimensions.y);
 		
 		// Build the iframe
-		this.iframe = new IFrame({
-			'class': 'mooeditable-iframe',
-			frameBorder: 0,
-			src: 'javascript:""', // Workaround for HTTPs warning in IE6/7
-			styles: {
-				height: dimensions.y
-			}
-		});
+        
+		if( supportsContentEditable ){
+    		this.iframe = new Element('div', {
+                'class': 'mooeditable-iframe',
+                styles: {
+                    height: dimensions.y
+                },
+                contentEditable: true
+    		});
+		} else {
+            this.iframe = new IFrame({
+    			'class': 'mooeditable-iframe',
+    			frameBorder: 0,
+    			src: 'javascript:""', // Workaround for HTTPs warning in IE6/7
+    			styles: {
+    				height: dimensions.y
+    			}
+    		});
+		}
+		
+		
 		
 		this.toolbar = new MooEditable.UI.Toolbar({
 			onItemAction: function(){
@@ -200,39 +224,51 @@ this.MooEditable = new Class({
 		});
 
 		// contentWindow and document references
-		this.win = this.iframe.contentWindow;
-		this.doc = this.win.document;
+		if( this.iframe.get('tag') != 'iframe' ){
 		
-		// Deal with weird quirks on Gecko
-		if (Browser.firefox) this.doc.designMode = 'On';
+    		this.win = window;
+    		this.doc = this.iframe;
+    		this.doc.body = this.doc;
+		    this.iframe.set('html', docHTML);
+    		
+		} else {		
+		
+            this.win = this.iframe.contentWindow;
+            this.doc = this.win.document;
+            
+    		// Deal with weird quirks on Gecko
+    		if( Browser.firefox ) this.doc.designMode = 'On';
+    
+    		// Build the content of iframe
+    		var docHTML = this.options.html.substitute({
+    			BASECSS: this.options.baseCSS,
+    			EXTRACSS: this.options.extraCSS,
+    			EXTERNALCSS: (this.options.externalCSS) ? '<link rel="stylesheet" href="' + this.options.externalCSS + '">': '',
+    			BASEHREF: (this.options.baseURL) ? '<base href="' + this.options.baseURL + '" />': ''
+    		});
+    		
+    		this.doc.open();
+    		this.doc.write(docHTML);
+    		this.doc.close();
 
-		// Build the content of iframe
-		var docHTML = this.options.html.substitute({
-			BASECSS: this.options.baseCSS,
-			EXTRACSS: this.options.extraCSS,
-			EXTERNALCSS: (this.options.externalCSS) ? '<link rel="stylesheet" href="' + this.options.externalCSS + '">': '',
-			BASEHREF: (this.options.baseURL) ? '<base href="' + this.options.baseURL + '" />': ''
-		});
-		this.doc.open();
-		this.doc.write(docHTML);
-		this.doc.close();
+    		// Turn on Design Mode
+    		// IE fired load event twice if designMode is set
+		    (Browser.ie) ? this.doc.body.contentEditable = true : this.doc.designMode = 'On';
+		
 
-		// Turn on Design Mode
-		// IE fired load event twice if designMode is set
-		(Browser.ie) ? this.doc.body.contentEditable = true : this.doc.designMode = 'On';
-
-		// Mootoolize window, document and body
-		Object.append(this.win, new Window);
-		Object.append(this.doc, new Document);
-		if (Browser.Element){
-			var winElement = this.win.Element.prototype;
-			for (var method in Element){ // methods from Element generics
-				if (!method.test(/^[A-Z]|\$|prototype|mooEditable/)){
-					winElement[method] = Element.prototype[method];
-				}
-			}
-		} else {
-			document.id(this.doc.body);
+    		// Mootoolize window, document and body
+    		Object.append(this.win, new Window);
+    		Object.append(this.doc, new Document);
+    		if (Browser.Element){
+    			var winElement = this.win.Element.prototype;
+    			for (var method in Element){ // methods from Element generics
+    				if (!method.test(/^[A-Z]|\$|prototype|mooEditable/)){
+    					winElement[method] = Element.prototype[method];
+    				}
+    			}
+    		} else {
+    			document.id(this.doc.body);
+    		}
 		}
 		
 		this.setContent(this.textarea.get('value'));
@@ -578,7 +614,12 @@ this.MooEditable = new Class({
 	execute: function(command, param1, param2){
 		if (this.busy) return;
 		this.busy = true;
-		this.doc.execCommand(command, param1, param2);
+        
+		if( this.iframe.get('tag') == 'iframe' )
+    		this.doc.execCommand(command, param1, param2);
+        else
+            document.execCommand(command, param1, param2);
+
 		this.saveContent();
 		this.busy = false;
 		return false;
@@ -612,10 +653,16 @@ this.MooEditable = new Class({
 
 	setContent: function(content){
 		var protect = this.protectedElements;
+		    		
+		//workaround for firefox bug, https://bugzilla.mozilla.org/show_bug.cgi?id=630524
+		if( this.iframe.get('tag') == 'div' )
+    		if( Browser.firefox ) content = '<div></div>'+content;
+	
 		content = content.replace(protectRegex, function(a){
 			protect.push(a);
 			return '<!-- mooeditable:protect:' + (protect.length-1) + ' -->';
 		});
+		
 		this.doc.body.set('html', this.ensureRootElement(content));
 		return this;
 	},
