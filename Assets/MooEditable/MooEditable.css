@@ -1,12 +1,25 @@
 .mooeditable-container{
 	position: relative;
-	border: 2px solid #ddd;
 }
 
-.mooeditable-ui-toolbar{
+.mooeditable-ui-toolbar {
 	color: inherit;
-	background-color: #eee;
-	padding: 2px;
+	margin-top: 10px;
+}
+
+.mooeditable-ui-toolbar-flying {
+    position: absolute;
+    width: 450px;
+    left: 0px;
+}
+
+.mooeditable-ui-toolbar-actions {
+	background-color: #f7f7f7;
+    border: 1px solid #aaa;
+}
+
+.mooeditable-ui-toolbar-tabs {
+    height: 19px;
 }
 
 .mooeditable-ui-toolbar:after{
@@ -27,7 +40,7 @@
 .mooeditable-ui-toolbar .mooeditable-ui-button{
 	cursor: pointer;
 	border: 0;
-	width: auto;
+	width: 20px;
 	height: auto;
 	margin: 2px;
 	padding: 2px;
@@ -130,6 +143,7 @@
 	vertical-align: top;
 	outline: 0;
 	overflow: auto;
+	background-color: white;
 }
 
 .mooeditable-textarea{
@@ -199,12 +213,16 @@
     width: 100%;
 }
 
+a.mooeditable-ui-toolbar-tab-button,
+a.mooeditable-ui-toolbar-tab-button:link,
 a.mooeditable-ui-panesbox-button,
 a.mooeditable-ui-panesbox-button:link {
     text-decoration: none;
     color: #444;
     border: 1px solid #aaa;
     border-bottom: 0px;
+    font-size: 12px;
+    line-height: 19px;
     margin-right: 3px;
     padding: 3px 7px;
     -moz-border-radius-topleft: 4px;
@@ -222,6 +240,8 @@ a.mooeditable-ui-panesbox-button:link {
 }
 
 
+a.mooeditable-ui-toolbar-tab-button-active,
+a.mooeditable-ui-toolbar-tab-button-active:link,
 a.mooeditable-ui-panesbox-button-active,
 a.mooeditable-ui-panesbox-button-active:link {
     background-color: #f7f7f7;

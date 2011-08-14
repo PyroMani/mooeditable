@@ -115,10 +115,18 @@ MooEditable.UI.ImageDialog = function(editor){
 				this.el.getElement('.dialog-alt').set('value', node.get('alt'));
 				this.el.getElement('.dialog-class').set('value', node.className);
 				this.el.getElement('.dialog-align').set('align', node.get('align'));
-				this.el.getElement('.mooeditable-image-paddingtop').set('value', node.getStyle('padding-top').toInt());
-				this.el.getElement('.mooeditable-image-paddingright').set('value', node.getStyle('padding-right').toInt());
-				this.el.getElement('.mooeditable-image-paddingbottom').set('value', node.getStyle('padding-bottom').toInt());
-				this.el.getElement('.mooeditable-image-paddingleft').set('value', node.getStyle('padding-left').toInt());
+				
+				var getValue = function( p ){
+				    if( !node.get('style').test(p+': [^;]*;') )
+				        return '';
+				    else
+				        return node.getStyle( p ).toInt();
+				}
+				
+				this.el.getElement('.mooeditable-image-paddingtop').set('value', getValue('padding-top'));
+				this.el.getElement('.mooeditable-image-paddingright').set('value', getValue('padding-right'));
+				this.el.getElement('.mooeditable-image-paddingbottom').set('value', getValue('padding-bottom'));
+				this.el.getElement('.mooeditable-image-paddingleft').set('value', getValue('padding-left'));
 			} else {
 				this.el.getElement('.dialog-url').set('value', '');
 				this.el.getElement('.dialog-alt').set('value', '');
@@ -146,11 +154,15 @@ MooEditable.UI.ImageDialog = function(editor){
 				var src = this.el.getElement('.dialog-url').get('value').trim();
 				if( src == "" ) return;
 				
+				var getValue = function(p,ex){
+				    return this.el.getElement( p ).value?this.el.getElement( p ).value+ex:'';
+				}.bind(this);
+				
 			    var styles = {
-				  'padding-top': this.el.getElement('.mooeditable-image-paddingtop').value+'px',
-				  'padding-right': this.el.getElement('.mooeditable-image-paddingright').value+'px',
-				  'padding-bottom': this.el.getElement('.mooeditable-image-paddingbottom').value+'px',
-				  'padding-left': this.el.getElement('.mooeditable-image-paddingleft').value+'px'
+				  'padding-top': getValue('.mooeditable-image-paddingtop','px'),
+				  'padding-right': getValue('.mooeditable-image-paddingright','px'),
+				  'padding-bottom': getValue('.mooeditable-image-paddingbottom','px'),
+				  'padding-left': getValue('.mooeditable-image-paddingleft','px')
 				};
 
 				if ( node && node.get('tag') == 'img'){
