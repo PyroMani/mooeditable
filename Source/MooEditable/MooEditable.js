@@ -40,7 +40,6 @@ var blockEls = /^(H[1-6]|HR|P|DIV|ADDRESS|PRE|FORM|TABLE|LI|OL|UL|TD|CAPTION|BLO
 var urlRegex = /^(https?|ftp|rmtp|mms):\/\/(([A-Z0-9][A-Z0-9_-]*)(\.[A-Z0-9][A-Z0-9_-]*)+)(:(\d+))?\/?/i;
 var protectRegex = /<(script|noscript|style)[\u0000-\uFFFF]*?<\/(script|noscript|style)>/g;
 
-		
 var dummy = new Element('p');
 var supportsContentEditable = false;
 
@@ -71,7 +70,9 @@ this.MooEditable = new Class({
 		html: '<!DOCTYPE html><html><head><meta charset="UTF-8">{BASEHREF}<style>{BASECSS} {EXTRACSS}</style>{EXTERNALCSS}</head><body></body></html>',
 		rootElement: 'p',
 		baseURL: '',
-		dimensions: null
+		dimensions: null,
+		autoheight: true,
+		minHeight: 150
 	},
 
 	initialize: function(el, options){
@@ -97,7 +98,8 @@ this.MooEditable = new Class({
 			}
 			if (act.dialogs){
 				Object.each(act.dialogs, function(dialog, name){
-					dialog = dialog.attempt(this);
+					dialog = dialog.call(this, this);
+
 					dialog.name = action + ':' + name;
 					if (typeOf(this.dialogs[action]) != 'object') this.dialogs[action] = {};
 					this.dialogs[action][name] = dialog;
@@ -140,7 +142,8 @@ this.MooEditable = new Class({
     		this.iframe = new Element('div', {
                 'class': 'mooeditable-iframe',
                 styles: {
-                    height: dimensions.y
+                    height: (this.options.autoheight==false)?dimensions.y:null,
+                    'min-height': (this.options.minHeight)?this.options.minHeight+'px':null
                 },
                 contentEditable: true
     		});
@@ -155,9 +158,7 @@ this.MooEditable = new Class({
     		});
 		}
 		
-		
-		
-		this.toolbar = new MooEditable.UI.Toolbar({
+		this.toolbar = new MooEditable.UI.Toolbar(this, {
 			onItemAction: function(){
 				var args = Array.from(arguments);
 				var item = args[0];
@@ -201,9 +202,13 @@ this.MooEditable = new Class({
 		
 		this.iframe.setStyle('display', '').inject(this.textarea, 'before');
 		
+		var dialogContainer = this.iframe.getParent('.mooeditable-dialog-container');
+		if( !dialogContainer )
+		    dialogContainer = document.body;
+
 		Object.each(this.dialogs, function(action, name){
 			Object.each(action, function(dialog){
-				document.id(dialog).inject(self.iframe, 'before');
+			    dialog.setContainer( dialogContainer );
 				var range;
 				dialog.addEvents({
 					open: function(){
@@ -1097,8 +1102,15 @@ MooEditable.UI.Toolbar= new Class({
 		*/
 		'class': ''
 	},
+	
+	/**
+	* Contains the MooEditable instance
+	*/
+	editor: null,
+	
     
-	initialize: function(options){
+	initialize: function(editor, options){
+        this.editor = editor;
 		this.setOptions(options);
 		this.el = new Element('div', {'class': 'mooeditable-ui-toolbar ' + this.options['class']});
 		this.items = {};
@@ -1164,7 +1176,7 @@ MooEditable.UI.Toolbar= new Class({
 	},
 	
 	show: function(){
-		this.el.setStyle('display', '');
+	    this.el.setStyle('display', '');
 		return this;
 	},
 	
@@ -1276,6 +1288,122 @@ MooEditable.UI.Button = new Class({
 	
 });
 
+MooEditable.UI.Groupbox = new Class({
+
+    initialize: function( label ){
+
+        if( typeOf(label) == 'element' ){
+            this.el = label;
+            this.render( label.get('label') );
+        } else {
+            this.render( label );
+        }
+
+    },
+    
+    toElement: function(){
+        return this.el;
+    },
+    
+    render: function( label ){
+        if( !this.el ){
+            this.el = new Element('div', {
+                'class': 'mooeditable-ui-groupbox'
+            });
+        }
+        
+        this.label = new Element('div', {
+            'class': 'mooeditable-ui-groupbox-label',
+            html: label
+        }).inject( this.el );
+    }
+
+});
+
+MooEditable.UI.Panebox = new Class({
+
+    panes: [],
+    buttons: [],
+    index: 0,
+
+    initialize: function( panes ){
+
+        if( typeOf(panes) == 'element' ){
+            this.el = panes;
+            this.el.getChildren('.mooeditable-ui-pane').each(function(pane){
+                this.add( pane.get('label'), pane );
+            }.bind(this));
+        } else {
+            this.render();
+        }
+
+    },
+    
+    add: function( label, pane ){
+        var newPane = pane;
+        
+        if( !newPane ){
+            newPane = new Element('div', {
+                'class': 'mooeditable-ui-panebox-pane'
+            }).inject( this.el );
+        }
+        
+        newPane.setStyle('display', 'none');
+        
+        if( !this.buttonsBar ){
+            this.buttonsBar = new Element('div', {
+                'class': 'mooeditable-ui-panebox-buttonsbar'
+            }).inject( this.el, 'top' );
+        }
+        
+        var length = this.panes.length;
+        
+        newButton = new Element('a', {
+            'class': 'mooeditable-ui-panesbox-button',
+            href: 'javascript:;',
+            html: label
+        })
+        .addEvent('click', function(){
+            this.select( length+1 );
+        }.bind(this))
+        .inject( this.buttonsBar );
+
+        this.panes.include( newPane );
+        this.buttons.include( newButton );
+        
+        if( this.index == 0 )
+            this.select( 1 );
+    },
+    
+    select: function( index ){
+    
+        this.panes.each(function(pane, idx){
+            pane.setStyle('display', 'none');
+            this.buttons[idx].removeClass('mooeditable-ui-panesbox-button-active');
+        }.bind(this));
+    
+        this.panes[index-1].setStyle('display', 'block');
+        this.buttons[index-1].addClass('mooeditable-ui-panesbox-button-active');
+        this.index = index;
+        
+        var dialog = this.el.getParent('.mooeditable-ui-dialog');
+        if( dialog ){
+            dialog.retrieve('instance').position();
+        }
+    },
+        
+    toElement: function(){
+        return this.el;
+    },
+    
+    render: function( label ){
+        this.el = new Element('div', {
+            'class': 'mooeditable-ui-panebox'
+        });
+    }
+
+});
+
 MooEditable.UI.Dialog = new Class({
 
 	Implements: [Events, Options],
@@ -1288,26 +1416,47 @@ MooEditable.UI.Dialog = new Class({
 		'class': '',
 		contentClass: ''
 	},
+	
+	container: null,
 
 	initialize: function(html, options){
 		this.setOptions(options);
 		this.html = html;
-		
 		var self = this;
+		
 		this.el = new Element('div', {
 			'class': 'mooeditable-ui-dialog ' + self.options['class'],
 			html: '<div class="dialog-content ' + self.options.contentClass + '">' + html + '</div>',
-			styles: {
-				'display': 'none'
-			},
 			events: {
 				click: self.click.bind(self)
-			}
-		});
+			},
+		    style: 'display: none;'
+		}).store('instance', this);
+		
+		this.parseUI( this.el );
+		
+		window.addEvent('resize', this.position.bind(this));
+	},
+	
+	parseUI: function( element ){
+        element.getElements('.mooeditable-ui-groupbox').each(function(el){ new MooEditable.UI.Groupbox(el); });
+        element.getElements('.mooeditable-ui-panebox').each(function(el){ new MooEditable.UI.Panebox(el); });
+        
 	},
 	
 	toElement: function(){
-		return this.el;
+		return this.overlay;
+	},
+	
+	setContainer: function( container ){
+	    this.container = container;
+		this.overlay = new Element('div', {
+		    'class': 'mooeditable-ui-dialog-overlay',
+		    style: 'display: none;'
+		})
+		.setStyle('opacity', 0.5)
+		.inject( this.container );
+		this.el.inject( this.container );
 	},
 	
 	click: function(){
@@ -1316,13 +1465,36 @@ MooEditable.UI.Dialog = new Class({
 	},
 	
 	open: function(){
+		this.overlay.setStyle('display', '');
 		this.el.setStyle('display', '');
+		
+		this.position();
+		
+		if( this.el.getElement('.mooeditable-ui-panesbox-button') )
+		  this.el.getElement('.mooeditable-ui-panesbox-button').fireEvent('click');
+		
 		this.fireEvent('open', this);
 		return this;
 	},
 	
+	position: function(){
+	   
+	    if( !this.overlay ) return;
+	
+        var osize = this.overlay.getSize();
+		var esize = this.el.getSize();
+		
+		this.el.setStyles({
+		    'left': (osize.x/2)-(esize.x/2),
+		    'top': (osize.y/2)-(esize.y/2)
+		});
+
+	},
+	
 	close: function(){
+		this.overlay.setStyle('display', 'none');
 		this.el.setStyle('display', 'none');
+		
 		this.fireEvent('close', this);
 		return this;
 	}
@@ -1353,7 +1525,9 @@ MooEditable.UI.PromptDialog = function(questionText, answerText, fn){
 	var html = '<label class="dialog-label">' + questionText
 		+ ' <input type="text" class="text dialog-input" value="' + answerText + '">'
 		+ '</label> <button class="dialog-button dialog-ok-button">' + MooEditable.Locale.get('ok') + '</button>'
-		+ '<button class="dialog-button dialog-cancel-button">' + MooEditable.Locale.get('cancel') + '</button>';
+		+ '<div class="mooeditable-dialog-actions">'
+		+ '  <button class="dialog-button dialog-cancel-button">' + MooEditable.Locale.get('cancel') + '</button>'
+		+ '</div>';
 	return new MooEditable.UI.Dialog(html, {
 		'class': 'mooeditable-prompt-dialog',
 		onOpen: function(){
