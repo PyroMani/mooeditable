@@ -77,6 +77,12 @@
 	background-color: #fff;
 }
 
+.mooeditable-ui-toolbar .mooeditable-ui-button.hover:active,
+.mooeditable-ui-toolbar .mooeditable-ui-button.onActive:active,
+.mooeditable-ui-toolbar .mooeditable-ui-button:active {
+    background-color: #aaa;
+}
+
 .mooeditable-ui-toolbar .mooeditable-ui-button.disabled{
 	cursor: default;
 }
