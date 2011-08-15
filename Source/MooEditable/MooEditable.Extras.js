@@ -68,6 +68,7 @@ Object.append(MooEditable.Actions, {
 	justifyleft:{
 		title: MooEditable.Locale.get('alignLeft'),
 		states: function( element, actionItem ){
+		    if( element.get('tag') != 'p' ) element = element.getParent('p');
 		    return (element.getStyle('text-align') == 'left'||element.get('align') == 'left')
 		}
 	},
@@ -75,6 +76,7 @@ Object.append(MooEditable.Actions, {
 	justifyright:{
 		title: MooEditable.Locale.get('alignRight'),
 		states: function( element, actionItem ){
+		    if( element.get('tag') != 'p' ) element = element.getParent('p');
 		    return (element.getStyle('text-align') == 'right'||element.get('align') == 'right')
 		}
 		/*{
@@ -85,13 +87,15 @@ Object.append(MooEditable.Actions, {
 	justifycenter:{
 		title: MooEditable.Locale.get('alignCenter'),
 		states: function( element, actionItem ){
-		    return (element.get('tag') == 'center'||element.getStyle('text-align') == 'right'||element.get('align') == 'center')
+		    if( element.get('tag') != 'p' ) element = element.getParent('p');
+		    return (element.get('tag') == 'center'||element.getStyle('text-align') == 'center'||element.get('align') == 'center')
 		}
 	},
 	
 	justifyfull:{
 		title: MooEditable.Locale.get('alignJustify'),
 		states: function( element, actionItem ){
+		    if( element.get('tag') != 'p' ) element = element.getParent('p');
 		    return (element.getStyle('text-align') == 'justify'||element.get('align') == 'justify')
 		}
 	},

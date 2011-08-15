@@ -1098,17 +1098,16 @@ MooEditable.Selection = new Class({
 
 			if( r ){
 				el = r.commonAncestorContainer;
+				console.log( r );
                 
-                /*
                 // Handle selection a image or other control like element such as anchors
-				if (!r.collapsed)
+				/*if (!r.collapsed)
 					if (r.startContainer == r.endContainer)
 						if (r.startOffset - r.endOffset < 2)
 							if (r.startContainer.hasChildNodes())
 								el = r.startContainer.childNodes[r.startOffset];
-
+                */
 				while (typeOf(el) != 'element') el = el.parentNode;
-				*/
 				
 			}
 			
