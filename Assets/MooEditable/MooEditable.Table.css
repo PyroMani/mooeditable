@@ -55,19 +55,20 @@
     border: 1px solid silver;
 }
 
-.mooeditable-iframe table td {
+.mooeditable-iframe table td,
+.mooeditable-iframe table th {
     border: 1px dashed silver;
 }
 
-td.mooeditable-table-control-cell-row,
-td.mooeditable-table-control-cell-table,
-td.mooeditable-table-control-cell-col {
+.mooeditable-table-control-cell-row,
+.mooeditable-table-control-cell-table,
+.mooeditable-table-control-cell-col {
     background-color: silver;
     cursor: pointer;
 }
 
-td.mooeditable-table-control-cell-row:hover,
-td.mooeditable-table-control-cell-table:hover,
-td.mooeditable-table-control-cell-col:hover {
+.mooeditable-table-control-cell-row:hover,
+.mooeditable-table-control-cell-table:hover,
+.mooeditable-table-control-cell-col:hover {
     background-color: #999;
 }

@@ -136,7 +136,7 @@ MooEditable.Plugins.Table = new Class({
         });
         
         table.addEvent('click', this.click.bind(this));
-        this.editor.addEvent('element', this.clear.bind(table));
+        this.editor.addEvent('element', this.checkElement.bind(this));
         
         if( Browser.firefox ){
             //Workaround for a Firefox bug …
@@ -151,14 +151,16 @@ MooEditable.Plugins.Table = new Class({
     },
     
     click: function( e ){
-
-        if( e.target && e.target.get('tag') == 'td' ){
+        this.checkElement( e.target );
+    },
+    
+    checkElement: function( element ){
+        if( element && element.get('tag') == 'td' ){
+            this.clear.call(element.getParent('table'));
+            this.lastNode = element;
             
-            //this.clear.call(e.target.getParent('table'));
-            this.lastNode = e.target;
-            
-            if( e.target.hasClass('mooeditable-table-control-cell-col') ){
-                var node = e.target;
+            if( element.hasClass('mooeditable-table-control-cell-col') ){
+                var node = element;
                 var index = parseInt(node.cellIndex);
                 if (node){
                     var nextTr = node.getParent().getNext();
@@ -173,13 +175,13 @@ MooEditable.Plugins.Table = new Class({
                 }
             }    
             
-            if( e.target.hasClass('mooeditable-table-control-cell-row') ){
-                var node = e.target;
+            if( element.hasClass('mooeditable-table-control-cell-row') ){
+                var node = element;
                 node.getParent().getChildren().setStyle('background-color', '#ddd');
                 node.getParent().getElement('td').setStyle('background-color', '');
             }
-            if( e.target.hasClass('mooeditable-table-control-cell-table') ){
-                var node = e.target.getParent('table');
+            if( element.hasClass('mooeditable-table-control-cell-table') ){
+                var node = element.getParent('table');
                 
                 node.getElements('td').setStyle('background-color', '#ddd');
                 node.getElement('tr').getChildren().setStyle('background-color', '');
@@ -196,6 +198,8 @@ MooEditable.Plugins.Table = new Class({
                     } while( (nextTr = nextTr.getNext()) != null );
                 }
             }
+        } else if( this.lastNode ){
+            this.clear.call(this.lastNode.getParent('table'));
         }
     },
     
@@ -269,17 +273,33 @@ MooEditable.UI.TableDialog = function(editor, dialog){
         },
         tablerowedit: {
             load: function(e){
-                var node = editor.selection.getNode().getParent('tr');
+                
+                var node = editor.selection.getNode();
+                if( node.get('tag') == 'td' )
+                    node = node.getParent('tr');
+                    
                 this.el.getElement('.table-c').set('value', node.className);
                 this.el.getElement('.table-c-type').set('value', editor.selection.getNode().get('tag'));
             },
             click: function(e){
-                var node = editor.selection.getNode().getParent('tr');
+                var node = editor.selection.getNode();
+                if( node.get('tag') == 'td' )
+                    node = node.getParent('tr');
+                
+                
                 node.className = this.el.getElement('.table-c').value;
+                var cType = this.el.getElement('.table-c-type').value;
+                
                 node.getElements('td, th').each(function(c){
-                    if (this.el.getElement('.table-c-type') != c.get('tag')){
-                        var n = editor.doc.createElement(this.el.getElement('.table-c-type').get('value'));
-                        $(n).set('html', c.get('html')).replaces(c);
+                    if( cType != c.get('tag') ){
+                        
+                        var n = new Element( cType );
+                        ['class', 'style', 'html'].each(function(attr){
+                            n.set(attr, c.get(attr));
+                        });
+                        
+                        n.inject( c, 'after' );
+                        c.destroy();
                     }
                 }, this);
             }
@@ -287,6 +307,9 @@ MooEditable.UI.TableDialog = function(editor, dialog){
         tablecoledit: {
             load : function(e){
                 var node = editor.selection.getNode();
+                if( node.get('tag') == 'td' )
+                    node = node.getParent('tr');
+            
                 if (node.get('tag') != 'td') node = node.getParent('td');
                 this.el.getElement('.table-w').set('value', node.get('width'));
                 this.el.getElement('.table-c').set('value', node.className);
@@ -295,6 +318,9 @@ MooEditable.UI.TableDialog = function(editor, dialog){
             },
             click: function(e){
                 var node = editor.selection.getNode();
+                if( node.get('tag') == 'td' )
+                    node = node.getParent('tr');
+                
                 if (node.get('tag') != 'td') node = node.getParent('td');
                 node.set('width', this.el.getElement('.table-w').value);
                 node.className = this.el.getElement('.table-c').value;
@@ -361,8 +387,20 @@ Object.append(MooEditable.Actions, {
           withClass: 'mooeditable-table-control-cell-row'
         },
         command: function(){
-            var node = this.selection.getNode().getParent('tr');
-            if (node) node.clone().inject(node, 'after');
+            var node = this.lastElement.getParent('tr');
+            if( node ){
+                var clone = node.clone();
+                clone.inject(node, 'after');
+                clone.getElements('td').each(function(td,idx){
+                    
+                    if( idx==0 ){
+                        td.set('class', 'mooeditable-table-control-cell-row');
+                    } else {
+                        td.set('style', '');
+                    }
+                    
+                });
+            }
         }
     },
     
@@ -452,15 +490,25 @@ Object.append(MooEditable.Actions, {
           withClass: 'mooeditable-table-control-cell-col'
         },
         command: function(){
-            var node = this.selection.getNode();
+            var node = this.lastElement;
             if (node.get('tag') != 'td') node = node.getParent('td');
+            console.log( node );
             if (node){
                 var index = node.cellIndex;
+                node.getParent('table').getElements('tr').each(function(tr, idx){
+                    
+                    new Element( node.get('tag'), {
+                        html: tr.getChildren()[index].get('html'),
+                        'class': idx==0?'mooeditable-table-control-cell-col':''
+                    } ).inject(tr.getChildren()[index], 'after');
+                    
+                });
+                /*
                 var len = node.getParent().getParent().childNodes.length;
                 for (var i=0; i<len; i++){
                     var ref = $(node.getParent().getParent().childNodes[i].childNodes[index]);
                     ref.clone().inject(ref, 'after');
-                }
+                }*/
             }
         }
     },
