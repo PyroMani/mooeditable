@@ -1296,7 +1296,6 @@ MooEditable.UI.Toolbar = new Class({
         var newTop = pos.y-height;
         
         var lowestTop = (mainpos.y*-1)+window.getScroll().y;
-        console.log( lowestTop );
         
         if( newTop < lowestTop )
             newTop = lowestTop;
