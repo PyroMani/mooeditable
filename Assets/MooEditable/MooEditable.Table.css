@@ -72,3 +72,8 @@
 .mooeditable-table-control-cell-col:hover {
     background-color: #999;
 }
+
+.mooeditable-iframe table .mooeditable-table-control-selected {
+    background-color: #39F !important;
+    color: white;
+}

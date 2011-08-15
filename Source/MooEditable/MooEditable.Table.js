@@ -147,7 +147,7 @@ MooEditable.Plugins.Table = new Class({
     },
     
     clear: function(){
-        this.getElements('td').setStyle('background-color', '');
+        this.getElements('td').removeClass('mooeditable-table-control-selected');
     },
     
     click: function( e ){
@@ -169,7 +169,7 @@ MooEditable.Plugins.Table = new Class({
                     do {
                         c = nextTr.getChildren('td');
                         if( c[index] )
-                            c[index].setStyle('background-color', '#ddd');
+                            c[index].addClass('mooeditable-table-control-selected');
                     
                     } while( (nextTr = nextTr.getNext()) != null );
                 }
@@ -177,14 +177,14 @@ MooEditable.Plugins.Table = new Class({
             
             if( element.hasClass('mooeditable-table-control-cell-row') ){
                 var node = element;
-                node.getParent().getChildren().setStyle('background-color', '#ddd');
-                node.getParent().getElement('td').setStyle('background-color', '');
+                node.getParent().getChildren().addClass('mooeditable-table-control-selected');
+                node.getParent().getElement('td').removeClass('mooeditable-table-control-selected');
             }
             if( element.hasClass('mooeditable-table-control-cell-table') ){
                 var node = element.getParent('table');
                 
-                node.getElements('td').setStyle('background-color', '#ddd');
-                node.getElement('tr').getChildren().setStyle('background-color', '');
+                node.getElements('td').addClass('mooeditable-table-control-selected');
+                node.getElement('tr').getChildren().removeClass('mooeditable-table-control-selected');
 
                 if( node ){
                     var nextTr = node.getElement('tr').getNext();
@@ -193,7 +193,7 @@ MooEditable.Plugins.Table = new Class({
                     do {
                         c = nextTr.getChildren('td');
                         if( c[0] )
-                            c[0].setStyle('background-color', '');
+                            c[0].removeClass('mooeditable-table-control-selected');
                     
                     } while( (nextTr = nextTr.getNext()) != null );
                 }
