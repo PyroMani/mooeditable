@@ -51,6 +51,10 @@
 	background: transparent url(Other/table-coldelete.png) no-repeat center center;
 }
 
-.mooeditable-iframe {
-    
+.mooeditable-iframe table {
+    border: 1px solid silver;
+}
+
+.mooeditable-iframe table td {
+    border: 1px dashed silver;
 }

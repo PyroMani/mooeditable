@@ -16,10 +16,16 @@
 .mooeditable-ui-toolbar-actions {
 	background-color: #f7f7f7;
     border: 1px solid #aaa;
+    min-height: 27px;
+}
+
+.mooeditable-ui-toolbar-flying .mooeditable-ui-toolbar-actions {
+    box-shadow: 0px 0px 5px gray;
 }
 
 .mooeditable-ui-toolbar-tabs {
     height: 19px;
+    cursor: pointer;
 }
 
 .mooeditable-ui-toolbar:after{

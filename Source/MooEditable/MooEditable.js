@@ -92,7 +92,10 @@ this.MooEditable = new Class({
 		this.keys = {};
 		this.dialogs = {};
 		this.protectedElements = [];
-		this.actions.each(function(action){
+		Object.each(MooEditable.Actions,function(def,action){
+		  
+		    if( !this.actions.contains(action) && !def.modify ) return;
+		
 			var act = MooEditable.Actions[action];
 			if (!act) return;
 			if (act.options){
@@ -662,6 +665,11 @@ this.MooEditable = new Class({
 		var html = this.doc.body.get('html').replace(/<!-- mooeditable:protect:([0-9]+) -->/g, function(a, b){
 			return protect[b.toInt()];
 		});
+		
+		//workaround for firefox bug, https://bugzilla.mozilla.org/show_bug.cgi?id=630524
+		if( Browser.firefox && this.iframe.get('tag') == 'div' )
+            html = html.substr(11);
+
 		return this.cleanup(this.ensureRootElement(html));
 	},
 
@@ -669,8 +677,8 @@ this.MooEditable = new Class({
 		var protect = this.protectedElements;
 		    		
 		//workaround for firefox bug, https://bugzilla.mozilla.org/show_bug.cgi?id=630524
-		if( this.iframe.get('tag') == 'div' )
-    		if( Browser.firefox ) content = '<div></div>'+content;
+		if( Browser.firefox && this.iframe.get('tag') == 'div' )
+    		content = '<div></div>'+content;
 	
 		content = content.replace(protectRegex, function(a){
 			protect.push(a);
@@ -732,24 +740,53 @@ this.MooEditable = new Class({
 	},
 
 	checkStates: function(){
-		var element = this.selection.getNode();
+	    var element = this.selection.getNode();
 		
 		this.fireEvent('checkStates');
+
+		//if( !this.cursorInEditor ) return;
 		
-		this.actions.each(function(action){
+		/*this.actions.each(function(action){
 			var item = this.toolbar.getItem(action);
 			if (!item) return;
 			item.deactivate();
-        }.bind(this));
+        }.bind(this));*/
+        
+        this.toolbar.position( element );
+        this.toolbar.clearModify();
+        if( !this.lastElement || this.lastElement.get('tag') != element.get('tag') ){
+            this.toolbar.selectTab(1);
+        }
 		
-		if( !this.cursorInEditor ) return;
 		if (!element) return;
 		if (typeOf(element) != 'element') return;
 		
-		this.actions.each(function(action){
-			var item = this.toolbar.getItem(action);
-			if (!item) return;
+		
+		Object.each(MooEditable.Actions, function(def,action){
 
+			var modify = MooEditable.Actions[action]['modify'];
+			
+			if( modify && modify.tags ){
+				var el = element;
+				
+				do {
+					var tag = el.tagName.toLowerCase();
+					if (modify.tags.contains(tag)){
+					    this.toolbar.addModifier( action, tag );
+                        if( !this.lastElement || this.lastElement.get('tag') != element.get('tag') ){
+                            this.toolbar.selectTab(2);
+                        }
+						break;
+					}
+				}
+				while ((el = Element.getParent(el)) != null);
+			}
+			
+			var item = this.toolbar.getItem(action);
+
+			if (!item) return;
+			item.deactivate();
+			
 			var states = MooEditable.Actions[action]['states'];
 			if (!states) return;
 			
@@ -759,7 +796,7 @@ this.MooEditable = new Class({
 				return;
 			}
 			
-			try{
+			try {
 				if (this.doc.queryCommandState(action)){
 					item.activate();
 					return;
@@ -794,6 +831,8 @@ this.MooEditable = new Class({
 				while ((el = Element.getParent(el)) != null);
 			}
 		}.bind(this));
+		
+		this.lastElement = element;
 	},
 
 	cleanup: function(source){
@@ -958,12 +997,12 @@ MooEditable.Selection = new Class({
 		var r = this.getRange();
 		var s = this.getSelection();
 
-		if (r.moveToElementText){
+		if (r && r.moveToElementText){
 			Function.attempt(function(){
 				r.moveToElementText(node);
 				r.select();
 			});
-		} else if (s.addRange){
+		} else if (r && s.addRange){
 			collapse ? r.selectNodeContents(node) : r.selectNode(node);
 			s.removeAllRanges();
 			s.addRange(r);
@@ -1019,7 +1058,7 @@ MooEditable.Selection = new Class({
 	getNode: function(){
 		var r = this.getRange();
 
-		if (!Browser.ie || Browser.version >= 9){
+		if( !Browser.ie || Browser.version >= 9 ){
 			var el = null;
 
 			if (r){
@@ -1034,7 +1073,58 @@ MooEditable.Selection = new Class({
 
 				while (typeOf(el) != 'element') el = el.parentNode;
 			}
+			
+    		if( Browser.firefox ){
+    		    // If the user selects with double-click a whole line and the selected block element contains
+    		    // <b>,<i>,<u> (inline elements) with no siblings, then select the deepest one. (Like in Webkit)
+    		    // Bug in gecko is, that the <p> element is always returned, although the <p> contains only
+    		    // one <b> (with no filled textNodes between each other)
+    		    // <p><b>foo</b></p> should return <b>
+    		    // <p><b><i>foo</i></b></p> should return <i>
+    		    // Otherwise, the buttons in the toolbar won't display the correct state.
+                
+                var checkNode = function( node ){
+                    
+                    if( node.childNodes.length > 0 ){ 
+                        
+                        if( node.childNodes.length == 1 && node.childNodes[0].nodeType == 3 ){
+                            return node;
+                        }
+                        
+                        if( node.childNodes.length == 1 && node.childNodes[0].nodeType != 3 ){
+                            return node.childNodes[0];
+                        }
+                        
+                        if( node.childNodes.length == 2 && node.childNodes[0].nodeType == 3 &&
+                            node.childNodes[0].nodeValue.clean() == "" ){
+                            var betterNode = checkNode(node.childNodes[1]);
+                            return betterNode ? betterNode : node.childNodes[1];
+                        }
+                        
+                        if( node.childNodes.length == 2 && node.childNodes[1].nodeType == 3 &&
+                            node.childNodes[1].nodeValue.clean() == "" ){
+                            var betterNode = checkNode(node.childNodes[0]);
+                            return betterNode ? betterNode : node.childNodes[0];
+                        }
 
+                        if( node.childNodes.length == 3 &&
+                            node.childNodes[0].nodeType == 3 && node.childNodes[0].nodeValue.clean() == "" &&
+                            node.childNodes[2].nodeType == 3 && node.childNodes[2].nodeValue.clean() == ""
+                            ){
+                            var betterNode = checkNode(node.childNodes[1]);
+                            return betterNode ? betterNode : node.childNodes[1];
+                        }
+                        
+                        return false;
+                    }
+                    
+                    return false;
+                }
+                
+                var newNode = checkNode( el );
+                if( newNode != false )
+                    return newNode;
+    		}
 			return document.id(el);
 		}
 		
@@ -1106,12 +1196,13 @@ MooEditable.Locale.define({
 	enterImageURL: 'Enter image URL',
 	addImage: 'Add Image',
 	toggleView: 'Toggle View',
-	format: 'Format'
+	format: 'Format',
+	modify: 'Modify'
 });
 
 MooEditable.UI = {};
 
-MooEditable.UI.Toolbar= new Class({
+MooEditable.UI.Toolbar = new Class({
 
 	Implements: [Events, Options],
 
@@ -1132,8 +1223,18 @@ MooEditable.UI.Toolbar= new Class({
 	initialize: function(editor, options){
         this.editor = editor;
 		this.setOptions(options);
-		this.el = new Element('div', {'class': 'mooeditable-ui-toolbar ' + this.options['class']});
-		
+		this.el = new Element('div', {
+		    'class': 'mooeditable-ui-toolbar ' + this.options['class'],
+		    events: {
+                mousedown: function(e){ e.preventDefault(); }
+            }
+        });
+        
+		this.fx = new Fx.Morph(this.el, {
+            duration: 300,
+            transition: Fx.Transitions.Sine.easeOut
+        });
+
 		if( this.editor.options.flyingToolbar ){
 		
 		    this.el.addClass('mooeditable-ui-toolbar-flying');
@@ -1143,34 +1244,30 @@ MooEditable.UI.Toolbar= new Class({
 		    
 		    this.el.setStyle('display', 'none');
 		    this.hidden = true;
-		    
-		    this.el.addEvent('mousedown', function(e){
-                this.editor.deactivateNextHide = true;
-		        e.stopPropagation();
-		        this.editor.lastSelection = this.editor.selection.getRange();
-		    }.bind(this));
-		    
-		    this.el.addEvent('mouseup', function(e){  
-		        this.editor.iframe.focus();
-		        if( this.editor.lastSelection )
-		            this.editor.selection.setRange( this.editor.lastSelection );
-		    }.bind(this));
-		    
-		    document.addEvent('click', function(){
-		        if( this.editor.cursorInEditor == false )
-		            this.hide()
-		    }.bind(this));
 		}
 		
 		this.tabs = new Element('div', {'class': 'mooeditable-ui-toolbar-tabs'}).inject( this.el );
 		this.actions = new Element('div', {'class': 'mooeditable-ui-toolbar-actions'}).inject( this.el );
 		this.tabPanes.include( this.actions );
 		
+		
+		this.modifier = new Element('div', {'class': 'mooeditable-ui-toolbar-actions'}).inject( this.el );
+		this.tabPanes.include( this.modifier );
+		
 		var btn = new Element('a', {
 		  'class': 'mooeditable-ui-toolbar-tab-button',
 		  text: MooEditable.Locale.get('format') 
-		}).inject( this.tabs );
+		})
+		.addEvent('click', this.selectTab.bind(this,1))
+		.inject( this.tabs );
+		this.tabButtons.include(btn); 
 		
+		var btn = new Element('a', {
+		  'class': 'mooeditable-ui-toolbar-tab-button',
+		  text: MooEditable.Locale.get('modify') 
+		})
+		.addEvent('click', this.selectTab.bind(this,2))
+		.inject( this.tabs );
 		this.tabButtons.include(btn); 
 		
 		this.selectTab( 1 );
@@ -1179,12 +1276,38 @@ MooEditable.UI.Toolbar= new Class({
 		this.content = null;
 	},
 	
-	position: function(){
+	position: function( element ){
 	
-	   if( this.lastPositionTimer ) clearTimeout(this.lastPositionTimer);
-	   this.lastPositionTimer = this.position.delay(50,this);
+	    if( this.lastPositionTimer ) clearTimeout(this.lastPositionTimer);
+	    this.lastPositionTimer = this._position.delay(50,this, element);
 	
 	},
+	
+    _position: function( element ){
+        if( !element ) return;
+        
+        //TODO, need some work here. For example, when we have to small place an the top of the editor
+        // and need therefore the toolbar below of the selected element.
+        
+        var pos = element.getPosition( this.el.getParent() );
+        var height = this.el.getSize().y+50;
+        var mainpos = this.el.getParent().getPosition( document.body );
+        
+        var newTop = pos.y-height;
+        
+        var lowestTop = (mainpos.y*-1)+window.getScroll().y;
+        console.log( lowestTop );
+        
+        if( newTop < lowestTop )
+            newTop = lowestTop;
+                
+        this.fx.cancel();
+        this.fx.start({
+            'left': pos.x,
+            'top': newTop
+        });
+        
+    },
 	
 	selectTab: function( index ){
 	
@@ -1211,24 +1334,44 @@ MooEditable.UI.Toolbar= new Class({
 			this.content = actions.map(function(action){
 				return (action == '|') ? this.addSeparator() : this.addItem(action);
 			}.bind(this));
+			
+			
 		}
 		return this;
 	},
 	
+	clearModify: function(){
+	    this.modifier.empty();
+	},
+	
+	addModifier: function( action, tag ){
+	    this.addItem( action );
+	},
+	
 	addItem: function(action){
+	
 		var self = this;
 		var act = MooEditable.Actions[action];
 		if (!act) return;
+		
 		var type = act.type || 'button';
 		var options = act.options || {};
+		
 		var item = new MooEditable.UI[type.camelCase().capitalize()](Object.append(options, {
 			name: action,
 			'class': action + '-item toolbar-item',
 			title: act.title,
 			onAction: self.itemAction.bind(self)
 		}));
+		
 		this.items[action] = item;
-		document.id(item).inject(this.actions);
+		
+		if( act.modify ){
+		    document.id(item).inject(this.modifier);
+		} else {
+		    document.id(item).inject(this.actions);
+		}
+		
 		return item;
 	},
 	

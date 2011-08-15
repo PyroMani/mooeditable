@@ -212,6 +212,9 @@ Object.append(MooEditable.Actions, {
 	
 	tableedit:{
 		title: MooEditable.Locale.get('editTable'),
+		modify: {
+		  tags: ['table']
+		},
 		dialogs: {
 			prompt: function(editor){
 				return MooEditable.UI.TableDialog(editor, 'tableedit');
@@ -224,6 +227,9 @@ Object.append(MooEditable.Actions, {
 	
 	tablerowadd:{
 		title: 'Add Row',
+		modify: {
+		  tags: ['td']
+		},
 		command: function(){
 			var node = this.selection.getNode().getParent('tr');
 			if (node) node.clone().inject(node, 'after');
@@ -232,6 +238,9 @@ Object.append(MooEditable.Actions, {
 	
 	tablerowedit:{
 		title: MooEditable.Locale.get('editTableRow'),
+		modify: {
+		  tags: ['td']
+		},
 		dialogs: {
 			prompt: function(editor){
 				return MooEditable.UI.TableDialog(editor, 'tablerowedit');
@@ -244,6 +253,9 @@ Object.append(MooEditable.Actions, {
 	
 	tablerowspan:{
 		title: MooEditable.Locale.get('mergeTableRow'),
+		modify: {
+		  tags: ['td']
+		},
 		command: function(){
 			var node = this.selection.getNode();
 			if (node.get('tag') != 'td') node = node.getParent('td');
@@ -260,6 +272,9 @@ Object.append(MooEditable.Actions, {
 	
 	tablerowsplit:{
 		title: MooEditable.Locale.get('splitTableRow'),
+		modify: {
+		  tags: ['td']
+		},
 		command: function(){
 			var node = this.selection.getNode();
 			if (node.get('tag') != 'td') node = node.getParent('td');
@@ -287,6 +302,9 @@ Object.append(MooEditable.Actions, {
 	
 	tablerowdelete:{
 		title: MooEditable.Locale.get('deleteTableRow'),
+		modify: {
+		  tags: ['td']
+		},
 		command: function(){
 			var node = this.selection.getNode().getParent('tr');
 			if (node) node.getParent().deleteRow(node.rowIndex);
@@ -295,6 +313,9 @@ Object.append(MooEditable.Actions, {
 	
 	tablecoladd:{
 		title: MooEditable.Locale.get('addTableCol'),
+		modify: {
+		  tags: ['td']
+		},
 		command: function(){
 			var node = this.selection.getNode();
 			if (node.get('tag') != 'td') node = node.getParent('td');
@@ -311,6 +332,9 @@ Object.append(MooEditable.Actions, {
 	
 	tablecoledit:{
 		title: MooEditable.Locale.get('editTableCol'),
+		modify: {
+		  tags: ['td']
+		},
 		dialogs: {
 			prompt: function(editor){
 				return MooEditable.UI.TableDialog(editor, 'tablecoledit');
@@ -323,6 +347,9 @@ Object.append(MooEditable.Actions, {
 	
 	tablecolspan:{
 		title: MooEditable.Locale.get('mergeTableCell'),
+		modify: {
+		  tags: ['td']
+		},
 		command: function(){
 			var node = this.selection.getNode();
 			if (node.get('tag')!='td') node = node.getParent('td');
@@ -338,6 +365,9 @@ Object.append(MooEditable.Actions, {
 		
 	tablecolsplit:{
 		title: MooEditable.Locale.get('splitTableCell'),
+		modify: {
+		  tags: ['td']
+		},
 		command: function(){
 			var node = this.selection.getNode();
 			if (node.get('tag')!='td') node = node.getParent('td');
@@ -364,6 +394,9 @@ Object.append(MooEditable.Actions, {
 	
 	tablecoldelete:{
 		title: MooEditable.Locale.get('deleteTableCol'),
+		modify: {
+		  tags: ['td']
+		},
 		command: function(){
 			var node = this.selection.getNode();
 			if (node.get('tag') != 'td') node = node.getParent('td');
