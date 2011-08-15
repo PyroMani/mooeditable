@@ -58,3 +58,10 @@
 .mooeditable-iframe table td {
     border: 1px dashed silver;
 }
+
+td.mooeditable-table-control-cell-row,
+td.mooeditable-table-control-cell-table,
+td.mooeditable-table-control-cell-col {
+    background-color: silver;
+    cursor: pointer;
+}

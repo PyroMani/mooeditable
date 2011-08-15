@@ -10,6 +10,7 @@ license: MIT-style license
 authors:
 - Radovan Lozej
 - Ryan Mitchell
+- MArc Schmidt <marc@kryn.org>
 
 requires:
 # - MooEditable
@@ -17,6 +18,7 @@ requires:
 # - MooEditable.Actions
 
 provides:
+- MooEditable.Plugins.Table
 - MooEditable.UI.TableDialog
 - MooEditable.Actions.tableadd
 - MooEditable.Actions.tableedit
@@ -79,6 +81,84 @@ MooEditable.Locale.define({
 	mergeTableCell: 'Merge Table Cell',
 	splitTableCell: 'Split Table Cell',
 	deleteTableCol: 'Delete Table Column'
+});
+
+MooEditable.Plugins.Table = new Class({
+
+    initialize: function( editor ){
+        this.editor = editor;
+        this.editor.addEvent('change', this.findTables.bind(this));
+    },
+    
+    findTables: function(){
+        
+        this.editor.iframe.getElements('table').each(function(table){
+        
+            if( !table.getElement('.mooeditable-table-control-cell') )
+                this.addControls( table );
+        
+        }.bind(this));
+    
+    },
+    
+    addControls: function( table ){
+        
+        var tbody = table;
+        var i = 0;
+        
+        if( table.getChildren('tbody') )
+            tbody = table.getChildren('tbody')[0];
+            
+        var firstTr = tbody.getElement('tr');
+        if( !firstTr  ) return;
+        
+        var tr = new Element('tr').inject( tbody, 'top' );
+        
+        var colCount = firstTr.getElements('td').length;
+        
+        for(; i<colCount; i++ ){
+            new Element('td', {
+                'class': 'mooeditable-table-control-cell-col',
+                contentEditable: false,
+                style: 'height: 12px;'
+            }).inject(tr);
+        }
+        
+        tbody.getElements('tr').each(function(tr, index){
+            var td = new Element('td', {
+                'class': 'mooeditable-table-control-cell-row',
+                contentEditable: false,
+                style: 'min-width: 12px;'
+            }).inject(tr, 'top');
+            
+            if( index == 0 )
+                td.set('class', 'mooeditable-table-control-cell-table');
+        });
+        
+        table.addEvent('mousedown', this.click.bind(this));
+        
+        if( Browser.firefox ){
+            //Workaround for a Firefox bug …
+            table.addEvent('click', function(e){
+                this.editor.checkStates( e.target );
+            }.bind(this));
+        }
+    },
+    
+    click: function( e ){
+        if( e.target && e.target.get('tag') == 'td' ){
+            this.lastNode = e.target;
+        }
+    },
+    
+    /**
+    * Removes our control elements in the html, when the editor calls getContent();
+    */
+    clearHtml: function( html ){
+    
+        return html;
+    }
+
 });
 
 MooEditable.UI.TableDialog = function(editor, dialog){
@@ -213,7 +293,8 @@ Object.append(MooEditable.Actions, {
 	tableedit:{
 		title: MooEditable.Locale.get('editTable'),
 		modify: {
-		  tags: ['table']
+		  tags: ['td'],
+		  withClass: 'mooeditable-table-control-cell-table'
 		},
 		dialogs: {
 			prompt: function(editor){
@@ -228,7 +309,8 @@ Object.append(MooEditable.Actions, {
 	tablerowadd:{
 		title: 'Add Row',
 		modify: {
-		  tags: ['td']
+		  tags: ['td'],
+		  withClass: 'mooeditable-table-control-cell-row'
 		},
 		command: function(){
 			var node = this.selection.getNode().getParent('tr');
@@ -239,7 +321,8 @@ Object.append(MooEditable.Actions, {
 	tablerowedit:{
 		title: MooEditable.Locale.get('editTableRow'),
 		modify: {
-		  tags: ['td']
+		  tags: ['td'],
+		  withClass: 'mooeditable-table-control-cell-row'
 		},
 		dialogs: {
 			prompt: function(editor){
@@ -254,7 +337,8 @@ Object.append(MooEditable.Actions, {
 	tablerowspan:{
 		title: MooEditable.Locale.get('mergeTableRow'),
 		modify: {
-		  tags: ['td']
+		  tags: ['td'],
+		  withClass: 'mooeditable-table-control-cell-row'
 		},
 		command: function(){
 			var node = this.selection.getNode();
@@ -273,7 +357,8 @@ Object.append(MooEditable.Actions, {
 	tablerowsplit:{
 		title: MooEditable.Locale.get('splitTableRow'),
 		modify: {
-		  tags: ['td']
+		  tags: ['td'],
+		  withClass: 'mooeditable-table-control-cell-row'
 		},
 		command: function(){
 			var node = this.selection.getNode();
@@ -303,7 +388,8 @@ Object.append(MooEditable.Actions, {
 	tablerowdelete:{
 		title: MooEditable.Locale.get('deleteTableRow'),
 		modify: {
-		  tags: ['td']
+		  tags: ['td'],
+		  withClass: 'mooeditable-table-control-cell-row'
 		},
 		command: function(){
 			var node = this.selection.getNode().getParent('tr');
@@ -314,7 +400,8 @@ Object.append(MooEditable.Actions, {
 	tablecoladd:{
 		title: MooEditable.Locale.get('addTableCol'),
 		modify: {
-		  tags: ['td']
+		  tags: ['td'],
+		  withClass: 'mooeditable-table-control-cell-col'
 		},
 		command: function(){
 			var node = this.selection.getNode();
@@ -333,7 +420,8 @@ Object.append(MooEditable.Actions, {
 	tablecoledit:{
 		title: MooEditable.Locale.get('editTableCol'),
 		modify: {
-		  tags: ['td']
+		  tags: ['td'],
+		  withClass: 'mooeditable-table-control-cell-col'
 		},
 		dialogs: {
 			prompt: function(editor){
@@ -348,7 +436,8 @@ Object.append(MooEditable.Actions, {
 	tablecolspan:{
 		title: MooEditable.Locale.get('mergeTableCell'),
 		modify: {
-		  tags: ['td']
+		  tags: ['td'],
+		  noClass: ['mooeditable-table-control-cell-col', 'mooeditable-table-control-cell-table']
 		},
 		command: function(){
 			var node = this.selection.getNode();
@@ -363,10 +452,11 @@ Object.append(MooEditable.Actions, {
 		}
 	},
 		
-	tablecolsplit:{
+	/*tablecolsplit:{
 		title: MooEditable.Locale.get('splitTableCell'),
 		modify: {
-		  tags: ['td']
+		  tags: ['td'],
+		  withClass: 'mooeditable-table-control-cell-col'
 		},
 		command: function(){
 			var node = this.selection.getNode();
@@ -390,21 +480,32 @@ Object.append(MooEditable.Actions, {
 				}
 			}
 		}
-	},
+	},*/
 	
 	tablecoldelete:{
 		title: MooEditable.Locale.get('deleteTableCol'),
 		modify: {
-		  tags: ['td']
+		  tags: ['td'],
+		  withClass: 'mooeditable-table-control-cell-col'
 		},
 		command: function(){
 			var node = this.selection.getNode();
 			if (node.get('tag') != 'td') node = node.getParent('td');
+			if( !node ){
+                node = this.plugins.Table.lastNode;
+			}
+
+            var index = parseInt(node.cellIndex);
 			if (node){
-				var len = node.getParent().getParent().childNodes.length;
-				var index = node.cellIndex;
-				var tt = node.getParent().getParent();
-				for (var i=0; i<len; i++) tt.childNodes[i].deleteCell(index);
+                var nextTr = node.getParent();
+                var c;
+                
+                do {
+                    c = nextTr.getChildren('td');
+                    if( c[index] )
+                        c[index].destroy();
+                
+                } while( (nextTr = nextTr.getNext()) != null );
 			}
 		}
 	}
