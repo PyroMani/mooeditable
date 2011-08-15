@@ -679,13 +679,17 @@ this.MooEditable = new Class({
         //workaround for firefox bug, https://bugzilla.mozilla.org/show_bug.cgi?id=630524
         if( Browser.firefox && this.iframe.get('tag') == 'div' )
             html = html.substr(11);
-        
-        Object.each(MooEditable.Plugins, function(plugin,id){
-            if( plugin && plugin.clearHtml )
-                html = plugin.clearHtml( html );
+            
+        var root = new Element('div', {
+            html: html
         });
         
-        return this.cleanup(this.ensureRootElement(html));
+        Object.each(this.plugins, function(plugin,id){
+            if( plugin && plugin.removeControls )
+                plugin.removeControls( root );
+        });
+        
+        return this.cleanup(this.ensureRootElement(root.get('html')));
     },
 
     setContent: function(content){

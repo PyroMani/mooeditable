@@ -206,9 +206,20 @@ MooEditable.Plugins.Table = new Class({
     /**
     * Removes our control elements in the html, when the editor calls getContent();
     */
-    clearHtml: function( html ){
+    removeControls: function( root ){
     
-        return html;
+        root.getElements('table').each(function(table){
+
+            table.getElements('.mooeditable-table-control-cell-row').each(function(td){
+                td.destroy();
+            });
+            
+            table.getElements('.mooeditable-table-control-cell-table').each(function(td){
+                td.getParent().destroy();
+            });
+            
+        });
+
     }
 
 });
