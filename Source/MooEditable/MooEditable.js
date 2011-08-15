@@ -1098,20 +1098,20 @@ MooEditable.Selection = new Class({
 
 			if( r ){
 				el = r.commonAncestorContainer;
-				console.log( r );
-                
+				
                 // Handle selection a image or other control like element such as anchors
-				/*if (!r.collapsed)
-					if (r.startContainer == r.endContainer)
-						if (r.startOffset - r.endOffset < 2)
-							if (r.startContainer.hasChildNodes())
-								el = r.startContainer.childNodes[r.startOffset];
-                */
+				if( !Browser.Engine.gecko ){
+    				if (!r.collapsed)
+    					if (r.startContainer == r.endContainer)
+    						if (r.startOffset - r.endOffset < 2)
+    							if (r.startContainer.hasChildNodes())
+    								el = r.startContainer.childNodes[r.startOffset];
+                }
 				while (typeOf(el) != 'element') el = el.parentNode;
 				
 			}
 			
-    		if( Browser.firefox ){
+    		if( Browser.Engine.gecko ){
     		    // If the user selects with double-click a whole line and the selected block element contains
     		    // <b>,<i>,<u> (inline elements) with no siblings, then select the deepest one. (Like in Webkit)
     		    // Bug in gecko is, that the <p> element is always returned, although the <p> contains only
