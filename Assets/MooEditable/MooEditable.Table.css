@@ -65,3 +65,9 @@ td.mooeditable-table-control-cell-col {
     background-color: silver;
     cursor: pointer;
 }
+
+td.mooeditable-table-control-cell-row:hover,
+td.mooeditable-table-control-cell-table:hover,
+td.mooeditable-table-control-cell-col:hover {
+    background-color: #999;
+}

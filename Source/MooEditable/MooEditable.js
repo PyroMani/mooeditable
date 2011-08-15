@@ -759,6 +759,7 @@ this.MooEditable = new Class({
 	checkStates: function( element ){
 	    if( !element )
 	        element = this.selection.getNode();
+	        
 		
 		this.fireEvent('checkStates');
 
@@ -772,14 +773,18 @@ this.MooEditable = new Class({
         
         //console.log( element );
         
+		
+		if (!element) return;
+		if (typeOf(element) != 'element') return;
+		
         this.toolbar.position( element );
         this.toolbar.clearModify();
         if( !this.lastElement || this.lastElement.get('tag') != element.get('tag') ){
             this.toolbar.selectTab(1);
         }
-		
-		if (!element) return;
-		if (typeOf(element) != 'element') return;
+        
+		if( this.lastElement != element )
+            this.fireEvent('element', element);
 		
 		var noModifier = true;
 		
