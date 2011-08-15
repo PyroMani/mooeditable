@@ -764,7 +764,6 @@ this.MooEditable = new Class({
         if( !element )
             element = this.selection.getNode();
             
-        
         this.fireEvent('checkStates');
 
         //if( !this.cursorInEditor ) return;
@@ -789,7 +788,6 @@ this.MooEditable = new Class({
         }
         
         if( this.lastElement != element ){
-            console.log('element change');
             this.fireEvent('element', element);
         }
         
@@ -1275,7 +1273,8 @@ MooEditable.UI.Toolbar = new Class({
         this.el = new Element('div', {
             'class': 'mooeditable-ui-toolbar ' + this.options['class'],
             events: {
-                mousedown: function(e){ e.preventDefault(); }
+                mousedown: function(e){ this.lastRange = this.editor.selection.getRange() }.bind(this),
+                click: function(e){ if(this.lastRange) this.editor.selection.setRange(this.lastRange) }.bind(this)
             }
         });
         

@@ -503,7 +503,6 @@ Object.append(MooEditable.Actions, {
         command: function(){
             var node = this.lastElement;
             if (node.get('tag') != 'td') node = node.getParent('td');
-            console.log( node );
             if (node){
                 var index = node.cellIndex;
                 node.getParent('table').getElements('tr').each(function(tr, idx){
