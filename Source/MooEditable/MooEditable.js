@@ -630,7 +630,7 @@ this.MooEditable = new Class({
             this.execute(command, false, args);
             if (this.mode == 'iframe') this.checkStates();
             
-            var map = {'bold':'i', 'italic':'i', 'underline':'u', 'strikethrough':'strike'};
+            var map = {'bold':'b', 'italic':'i', 'underline':'u', 'strikethrough':'strike'};
             
             if( ['bold', 'italic', 'underline', 'strikethrough'].contains( command ) ){
                 var node = this.selection.getNode();
