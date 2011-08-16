@@ -67,6 +67,11 @@
     cursor: pointer;
 }
 
+
+.mooeditable-table-control-cell-row {
+    width: 20px;
+}
+
 .mooeditable-table-control-cell-row:hover,
 .mooeditable-table-control-cell-table:hover,
 .mooeditable-table-control-cell-col:hover {

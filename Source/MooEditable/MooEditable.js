@@ -1769,8 +1769,8 @@ MooEditable.UI.Dialog = new Class({
         var self = this;
         
         this.el = new Element('div', {
-            'class': 'mooeditable-ui-dialog ' + self.options['class'],
-            html: '<div class="dialog-content ' + self.options.contentClass + '">' + html + '</div>',
+            'class': 'mooeditable-ui-dialog ' + self.options['class']+' '+self.options.contentClass,
+            html: html,
             events: {
                 click: self.click.bind(self)
             },
@@ -1778,8 +1778,9 @@ MooEditable.UI.Dialog = new Class({
         }).store('instance', this);
         
         this.parseUI( this.el );
-        
-        window.addEvent('resize', this.position.bind(this));
+      
+        this.addEvent('resize', this.position.bind(this));
+        window.addEvent('resize', this.fireEvent.bind(this, 'resize'));
     },
     
     parseUI: function( element ){
@@ -1822,15 +1823,24 @@ MooEditable.UI.Dialog = new Class({
     },
     
     position: function(){
-       
         if( !this.overlay ) return;
     
         var osize = this.overlay.getSize();
         var esize = this.el.getSize();
+        this.el.setStyle('height', 34);
         
+        var csize = this.container.getSize();
+
+        var height = Math.max(this.el.offsetHeight, this.el.scrollHeight);
+        var height = this.el.getScrollSize().y;
+
+        if( (csize.y.toInt()*0.9) < height )
+            height = (csize.y.toInt()*0.8);
+
         this.el.setStyles({
             'left': (osize.x/2)-(esize.x/2),
-            'top': (osize.y/2)-(esize.y/2)
+            'top': (csize.y/2)-(height/2),
+            'height': height+10
         });
 
     },

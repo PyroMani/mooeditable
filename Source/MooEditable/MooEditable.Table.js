@@ -424,6 +424,7 @@ MooEditable.UI.TableDialog = function(editor, dialog){
                     for (var c=0; c<col; c++) new Element('td').set('html', '&nbsp;').inject(ro[r], 'bottom');
                 }
                 editor.selection.insertContent(div.get('html'));
+                editor.plugins.Table.findTables();
             }
         },
         tableedit: {
