@@ -630,9 +630,11 @@ this.MooEditable = new Class({
             this.execute(command, false, args);
             if (this.mode == 'iframe') this.checkStates();
             
+            var map = {'bold':'i', 'italic':'i', 'underline':'u', 'strikethrough':'strike'};
+            
             if( ['bold', 'italic', 'underline', 'strikethrough'].contains( command ) ){
                 var node = this.selection.getNode();
-                if( node && node.get('tag') == 'b' )
+                if( node && node.get('tag') == map[command] )
                     this.toolbar.items[command].deactivate()
                 else
                     this.toolbar.items[command].activate()
