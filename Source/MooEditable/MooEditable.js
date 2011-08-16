@@ -503,15 +503,10 @@ this.MooEditable = new Class({
         }
         
         var c = e.code;
-        // 33-36 = pageup, pagedown, end, home; 45 = insert
-        if (this.options.toolbar && (/^enter|left|up|right|down|delete|backspace$/i.test(e.key) || (c >= 33 && c <= 36) || c == 45 || e.meta || e.control)){
-            if (Browser.ie6){ // Delay for less cpu usage when you are typing
-                clearTimeout(this.checkStatesDelay);
-                this.checkStatesDelay = this.checkStates.delay(500, this);
-            } else {
-                this.checkStates();
-            }
-        }
+        
+        var delay = (Browser.ie6)?500:200;        
+        clearTimeout(this.checkStatesDelay);
+        this.checkStatesDelay = this.checkStates.delay(delay, this);
         
         this.fireEvent('editorKeyUp', [e, this]);
     },
@@ -634,6 +629,14 @@ this.MooEditable = new Class({
             this.focus();
             this.execute(command, false, args);
             if (this.mode == 'iframe') this.checkStates();
+            
+            if( ['bold', 'italic', 'underline', 'strikethrough'].contains( command ) ){
+                var node = this.selection.getNode();
+                if( node && node.get('tag') == 'b' )
+                    this.toolbar.items[command].deactivate()
+                else
+                    this.toolbar.items[command].activate()
+            }
         }
     },
 
@@ -761,21 +764,11 @@ this.MooEditable = new Class({
     },
 
     checkStates: function( element ){
+    
         if( !element )
             element = this.selection.getNode();
-            
         this.fireEvent('checkStates');
 
-        //if( !this.cursorInEditor ) return;
-        
-        /*this.actions.each(function(action){
-            var item = this.toolbar.getItem(action);
-            if (!item) return;
-            item.deactivate();
-        }.bind(this));*/
-        
-        //console.log( element );
-        
         
         if (!element) return;
         if (typeOf(element) != 'element') return;
@@ -783,6 +776,7 @@ this.MooEditable = new Class({
         
         this.toolbar.position( element );
         this.toolbar.clearModify();
+
         if( !this.lastElement || this.lastElement.get('tag') != element.get('tag') ){
             this.toolbar.selectTab(1);
         }
@@ -790,9 +784,9 @@ this.MooEditable = new Class({
         if( this.lastElement != element ){
             this.fireEvent('element', element);
         }
-        
         var noModifier = true;
-        
+    
+
         Object.each(MooEditable.Actions, function(def,action){
 
             var modify = MooEditable.Actions[action]['modify'];
@@ -1014,14 +1008,13 @@ MooEditable.Selection = new Class({
     },
 
     getSelection: function(){
-        this.win.focus();
         return (this.win.getSelection) ? this.win.getSelection() : this.win.document.selection;
     },
 
     getRange: function(){
         var s = this.getSelection();
 
-        if (!s) return null;
+        if( !s ) return null;
 
         try {
             return s.rangeCount > 0 ? s.getRangeAt(0) : (s.createRange ? s.createRange() : null);
@@ -1109,7 +1102,7 @@ MooEditable.Selection = new Class({
 
     getNode: function(){
         var r = this.getRange();
-
+        
         if( !Browser.ie || Browser.version >= 9 ){
             var el = null;
 
@@ -1127,6 +1120,7 @@ MooEditable.Selection = new Class({
                 while (typeOf(el) != 'element') el = el.parentNode;
                 
             }
+                    
             
             if( Browser.firefox ){
                 // If the user selects with double-click a whole line and the selected block element contains
@@ -1280,8 +1274,15 @@ MooEditable.UI.Toolbar = new Class({
         this.el = new Element('div', {
             'class': 'mooeditable-ui-toolbar ' + this.options['class'],
             events: {
-                mousedown: function(e){ this.lastRange = this.editor.selection.getRange() }.bind(this),
-                click: function(e){ if(this.lastRange) this.editor.selection.setRange(this.lastRange) }.bind(this)
+                mousedown: function(e){
+                    if( e.target && ( e.target.hasClass('mooeditable-ui-toolbar') 
+                        || e.target.hasClass('mooeditable-ui-toolbar-actions')
+                        || e.target.hasClass('mooeditable-ui-toolbar-tabs')
+                    )){
+                        e.stop();
+                    }
+                }.bind(this),
+                //click: function(e){ if(this.lastRange) this.editor.selection.setRange(this.lastRange) }.bind(this)
             }
         });
         
@@ -1364,16 +1365,18 @@ MooEditable.UI.Toolbar = new Class({
     
     selectTab: function( index ){
     
-       this.tabPanes.each(function(pane,idx){
-       
-           this.tabButtons[idx].removeClass('mooeditable-ui-toolbar-tab-button-active');
-           this.tabPanes[idx].setStyle('display', 'none');
-       
-       }.bind(this));
-       
-       this.tabButtons[index-1].addClass('mooeditable-ui-toolbar-tab-button-active');
-       this.tabPanes[index-1].setStyle('display', 'block');
+        if( this.lastIndex == index ) return;
     
+        this.tabPanes.each(function(pane,idx){
+       
+            this.tabButtons[idx].removeClass('mooeditable-ui-toolbar-tab-button-active');
+            this.tabPanes[idx].setStyle('display', 'none');
+       
+        }.bind(this));
+       
+        this.lastIndex = index;
+        this.tabButtons[index-1].addClass('mooeditable-ui-toolbar-tab-button-active');
+        this.tabPanes[index-1].setStyle('display', 'block'); 
     },
     
     toElement: function(){
