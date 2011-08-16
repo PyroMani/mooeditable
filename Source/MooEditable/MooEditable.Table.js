@@ -95,7 +95,7 @@ MooEditable.Plugins.Table = new Class({
         
         this.editor.iframe.getElements('table').each(function(table){
         
-            if( !table.getElement('.mooeditable-table-control-cell') )
+            if( !table.getElement('.mooeditable-table-control-cell-table') )
                 this.addControls( table );
         
         }.bind(this));
