@@ -797,25 +797,32 @@ this.MooEditable = new Class({
 
             var modify = MooEditable.Actions[action]['modify'];
             
-            if( modify && modify.tags ){
-                var el = element;
-                
-                do {
-                    var tag = el.tagName.toLowerCase();
-                    if( 
-                        (!modify.tags || modify.tags.contains(tag) ) &&
-                        (!modify.withClass || el.hasClass(modify.withClass) ) &&
-                        (
-                           !modify.noClass ||
-                           ( typeOf(modify.noClass) == 'string' && !el.hasClass(modify.noClass)) ||
-                           ( typeOf(modify.noClass) == 'array' && !modify.noClass.contains(el.get('class')) )
-                        )
-                      ){
+            if( modify ) {            
+                if( typeOf(modify) == 'function' ){
+                    if( modify.attempt([document.id(element), item], this) ){
                         this.toolbar.addModifier( action, tag );
                         noModifier = false;
                     }
+                } else if( typeOf(modify) == 'object' && modify.tags ){
+                    var el = element;
+                    
+                    do {
+                        var tag = el.tagName.toLowerCase();
+                        if( 
+                            (!modify.tags || modify.tags.contains(tag) ) &&
+                            (!modify.withClass || el.hasClass(modify.withClass) ) &&
+                            (
+                               !modify.noClass ||
+                               ( typeOf(modify.noClass) == 'string' && !el.hasClass(modify.noClass)) ||
+                               ( typeOf(modify.noClass) == 'array' && !modify.noClass.contains(el.get('class')) )
+                            )
+                          ){
+                            this.toolbar.addModifier( action, tag );
+                            noModifier = false;
+                        }
+                    }
+                    while ((el = Element.getParent(el)) != null);
                 }
-                while ((el = Element.getParent(el)) != null);
             }
             
             var item = this.toolbar.getItem(action);

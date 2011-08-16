@@ -280,8 +280,8 @@ a.mooeditable-ui-panesbox-button-active:link {
     vertical-align: top;
 }
 
-
-.mooeditable-ui-dialog input{
+.mooeditable-ui-dialog input,
+.mooeditable-ui-dialog select{
 	margin: 0 8px;
 }
 
