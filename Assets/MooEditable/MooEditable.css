@@ -23,9 +23,9 @@
     box-shadow: 0px 0px 5px gray;
 }
 
-.mooeditable-ui-toolbar-tabs {
+.mooeditable-ui-toolbar-tabs,
+.mooeditable-ui-panebox-buttonsbar {
     height: 19px;
-    cursor: pointer;
 }
 
 .mooeditable-ui-toolbar:after{
@@ -221,7 +221,7 @@
 
 .mooeditable-ui-panebox-buttonsbar {
     position: absolute;
-    top: -19px;
+    top: -20px;
     width: 100%;
 }
 
