@@ -136,7 +136,7 @@ MooEditable.Plugins.Table = new Class({
                 td.set('class', 'mooeditable-table-control-cell-table');
         });
         
-        table.addEvent('click', this.click.bind(this));
+        //table.addEvent('click', this.click.bind(this));
         this.editor.addEvent('element', this.checkElement.bind(this));
         
         if( Browser.firefox ){
@@ -157,6 +157,11 @@ MooEditable.Plugins.Table = new Class({
     },
     
     checkElement: function( element ){
+        
+        if( element.get('tag') == 'table' ){
+            element = element.getElement('.mooeditable-table-control-cell-table');
+        }
+        
         if( element && (element.get('tag') == 'td' || element.get('tag') == 'th') ){
             
             this.clear.call(element.getParent('table'));
