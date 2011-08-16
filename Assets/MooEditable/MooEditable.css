@@ -234,6 +234,7 @@ a.mooeditable-ui-panesbox-button:link {
     border: 1px solid #aaa;
     border-bottom: 0px;
     font-size: 12px;
+    cursor: pointer;
     line-height: 19px;
     margin-right: 3px;
     padding: 3px 7px;
