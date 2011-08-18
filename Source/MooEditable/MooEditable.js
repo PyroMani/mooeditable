@@ -181,7 +181,7 @@ this.MooEditable = new Class({
             }
         });
         this.attach.delay(1, this);
-        
+
         // Update the event for textarea's corresponding labels
         if (this.options.handleLabel && this.textarea.id) $$('label[for="'+this.textarea.id+'"]').addEvent('click', function(e){
             if (self.mode != 'iframe') return;
@@ -197,7 +197,7 @@ this.MooEditable = new Class({
                 if (self.mode == 'iframe') self.saveContent();
             });
         }
-        
+
         this.fireEvent('render', this);
     },
 
@@ -300,6 +300,7 @@ this.MooEditable = new Class({
         }
         
         this.setContent(this.textarea.get('value'));
+        
         // Bind all events
         this.doc.addEvents({
             mouseup: this.editorMouseUp.bind(this),
@@ -321,6 +322,7 @@ this.MooEditable = new Class({
         ['cut', 'copy', 'paste'].each(function(event){
             self.doc.body.addListener(event, self['editor' + event.capitalize()].bind(self));
         });
+        
         this.textarea.addEvent('keypress', this.textarea.retrieve('mooeditable:textareaKeyListener', this.keyListener.bind(this)));
         
         // Fix window focus event not firing on Firefox 2
@@ -349,6 +351,7 @@ this.MooEditable = new Class({
                 document.id(this.toolbar).inject(this.options.toolbarContainer);
             else
                 document.id(this.toolbar).inject(this.container, 'top');
+            
             this.toolbar.render(this.actions);
         }
         
@@ -683,20 +686,21 @@ this.MooEditable = new Class({
     },
 
     getContent: function(){
+
         var protect = this.protectedElements;
-        
+
         var html = this.doc.body.get('html').replace(/<!-- mooeditable:protect:([0-9]+) -->/g, function(a, b){
             return protect[b.toInt()];
         });
-        
+
         //workaround for firefox bug, https://bugzilla.mozilla.org/show_bug.cgi?id=630524
         if( Browser.firefox && this.iframe.get('tag') == 'div' )
             html = html.substr(11);
-            
+
         var root = new Element('div', {
             html: html
         });
-        
+
         Object.each(this.plugins, function(plugin,id){
             if( plugin && plugin.removeControls )
                 plugin.removeControls( root );
@@ -833,7 +837,7 @@ this.MooEditable = new Class({
 
             if (!item) return;
             item.deactivate();
-            
+
             var states = MooEditable.Actions[action]['states'];
             if (!states) return;
             
@@ -1087,6 +1091,7 @@ MooEditable.Selection = new Class({
     },
 
     getContent: function(){
+        
         var r = this.getRange();
         var body = new Element('body');
 
@@ -1429,6 +1434,7 @@ MooEditable.UI.Toolbar = new Class({
             onAction: self.itemAction.bind(self)
         }));
         
+        
         this.items[action] = item;
         
         if( act.modify ){
@@ -1465,19 +1471,19 @@ MooEditable.UI.Toolbar = new Class({
         });
         return this;
     },
-    
+
     show: function(){
         this.el.setStyle('display', '');
-        
+
         if( this.editor.options.flyingToolbar && this.hidden == true ){
-           
+
            var pos = this.el.getPosition();
-           
+
            if( this.hideFx ){
                this.hideFx.cancel();
                pos = this.lastPosition;
            }
-           
+
            this.el.setStyles({
                'left': pos.x+5,
                'opacity': 0,
@@ -1496,7 +1502,7 @@ MooEditable.UI.Toolbar = new Class({
         this.hidden = false;
         return this;
     },
-    
+
     hide: function(){
     
        if( this.lastHideTimer )
@@ -1504,15 +1510,15 @@ MooEditable.UI.Toolbar = new Class({
            
        this.lastHideTimer = this._hide.delay(100,this);
     },
-    
+
     _hide: function(){
        if( this.editor.deactivateNextHide ){
            this.editor.deactivateNextHide = false;
            return;
        }
-       
+
        this.hidden = true;
-       
+
        if( this.editor.options.flyingToolbar && this.el.getStyle('display') == 'block' ){
         
            var pos = this.el.getPosition();
@@ -1570,17 +1576,20 @@ MooEditable.UI.Button = new Class({
         var shortcut = (this.options.shortcut) ? ' ( ' + key + '+' + this.options.shortcut.toUpperCase() + ' )' : '';
         var text = this.options.title || name;
         var title = text + shortcut;
+
         this.el = new Element('button', {
             'class': 'mooeditable-ui-button ' + self.options['class'],
             title: title,
+            type: 'button',
             html: '<span class="button-icon"></span><span class="button-text">' + text + '</span>',
             events: {
                 click: self.click.bind(self),
                 mousedown: function(e){ e.preventDefault(); }
             }
         });
+
         if (this.options.mode != 'icon') this.el.addClass('mooeditable-ui-button-' + this.options.mode);
-        
+
         this.active = false;
         this.disabled = false;
 
@@ -1589,20 +1598,20 @@ MooEditable.UI.Button = new Class({
             mouseenter: function(e){ this.addClass('hover'); },
             mouseleave: function(e){ this.removeClass('hover'); }
         });
-        
+
         return this;
     },
-    
+
     click: function(e){
         e.preventDefault();
         if (this.disabled) return;
         this.action(e);
     },
-    
+
     action: function(){
         this.fireEvent('action', [this].concat(Array.from(arguments)));
     },
-    
+
     enable: function(){
         if (this.active) this.el.removeClass('onActive');
         if (!this.disabled) return;
@@ -1823,7 +1832,7 @@ MooEditable.UI.Dialog = new Class({
         this.position();
         
         if( this.el.getElement('.mooeditable-ui-panesbox-button') )
-          this.el.getElement('.mooeditable-ui-panesbox-button').fireEvent('click');
+            this.el.getElement('.mooeditable-ui-panesbox-button').fireEvent('click');
         
         this.fireEvent('open', this);
         return this;
