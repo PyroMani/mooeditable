@@ -75,7 +75,9 @@ this.MooEditable = new Class({
         autoheight: true,
         minHeight: 150,
         extraClass: '',
-        flyingToolbar: false
+        flyingToolbar: false,
+        dialogContainer: false,
+        toolbarContainer: false
     },
 
     initialize: function(el, options){
@@ -216,8 +218,12 @@ this.MooEditable = new Class({
         this.iframe.setStyle('display', '').inject(this.textarea, 'before');
         
         var dialogContainer = this.iframe.getParent('.mooeditable-dialog-container');
+        
         if( !dialogContainer )
             dialogContainer = document.body;
+        
+        if( this.options.dialogContainer )
+            dialogContainer = this.options.dialogContainer;
 
         Object.each(this.dialogs, function(action, name){
             Object.each(action, function(dialog){
@@ -244,7 +250,7 @@ this.MooEditable = new Class({
         // contentWindow and document references
         if( this.iframe.get('tag') != 'iframe' ){
         
-            this.win = window;
+            this.win = this.iframe.getWindow();
             this.doc = this.iframe;
             this.doc.body = this.doc;
             
@@ -294,7 +300,6 @@ this.MooEditable = new Class({
         }
         
         this.setContent(this.textarea.get('value'));
-
         // Bind all events
         this.doc.addEvents({
             mouseup: this.editorMouseUp.bind(this),
@@ -322,6 +327,7 @@ this.MooEditable = new Class({
         if (Browser.firefox2) this.doc.addEvent('focus', function(){
             self.win.fireEvent('focus').focus();
         });
+        
         // IE9 is also not firing focus event
         if (this.doc.addEventListener) this.doc.addEventListener('focus', function(){
             self.win.fireEvent('focus');
@@ -336,9 +342,11 @@ this.MooEditable = new Class({
             this.win.addEvent('focus', styleCSS);
         }
 
-        if (this.options.toolbar){
-            if( this.options.flyingToolbar )
+        if( this.options.toolbar  ){
+            if( this.options.flyingToolbar && !this.options.toolbarContainer )
                 document.id(this.toolbar).inject(this.container);
+            else if( this.options.toolbarContainer )  
+                document.id(this.toolbar).inject(this.options.toolbarContainer);
             else
                 document.id(this.toolbar).inject(this.container, 'top');
             this.toolbar.render(this.actions);
@@ -649,7 +657,7 @@ this.MooEditable = new Class({
         if( this.iframe.get('tag') == 'iframe' )
             this.doc.execCommand(command, param1, param2);
         else
-            document.execCommand(command, param1, param2);
+            this.iframe.getDocument().execCommand(command, param1, param2);
 
         this.saveContent();
         this.busy = false;
@@ -1273,6 +1281,7 @@ MooEditable.UI.Toolbar = new Class({
     initialize: function(editor, options){
         this.editor = editor;
         this.setOptions(options);
+        
         this.el = new Element('div', {
             'class': 'mooeditable-ui-toolbar ' + this.options['class'],
             events: {
@@ -1392,8 +1401,6 @@ MooEditable.UI.Toolbar = new Class({
             this.content = actions.map(function(action){
                 return (action == '|') ? this.addSeparator() : this.addItem(action);
             }.bind(this));
-            
-            
         }
         return this;
     },
