@@ -51,6 +51,11 @@
 	background: transparent url(Other/table-coldelete.png) no-repeat center center;
 }
 
+.mooeditable-ui-toolbar .tabledelete-item .button-icon {
+	background: transparent url(Other/removeformat.png) no-repeat center center;
+}
+
+
 .mooeditable-iframe table {
     border: 1px solid silver;
 }

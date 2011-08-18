@@ -72,6 +72,7 @@ MooEditable.Locale.define({
     tableValignBottom: 'Bottom',
     addTable: 'Add Table',
     editTable: 'Edit Table',
+    deleteTable: 'Delete Table',
     addTableRow: 'Add Table Row',
     editTableRow: 'Edit Table Row',
     mergeTableRow: 'Merge Table Row',
@@ -540,6 +541,18 @@ Object.append(MooEditable.Actions, {
         },
         command: function(){
             if (this.selection.getNode().getParent('table')) this.dialogs.tableedit.prompt.open();
+        }
+    },
+    
+    tabledelete:{
+        title: MooEditable.Locale.get('deleteTable'),
+        modify: {
+          tags: ['td','th'],
+          withClass: 'mooeditable-table-control-cell-table'
+        },
+        command: function(){
+            var t = this.lastElement.getParent('table');
+            if( t ) t.destroy();
         }
     },
     
