@@ -73,7 +73,7 @@ this.MooEditable = new Class({
         baseURL: '',
         dimensions: null,
         autoheight: true,
-        minHeight: 150,
+        minHeight: 60,
         extraClass: '',
         flyingToolbar: false,
         dialogContainer: false,
@@ -1789,9 +1789,12 @@ MooEditable.UI.Dialog = new Class({
             html: html,
             events: {
                 click: self.click.bind(self)
-            },
-            style: 'display: none;'
-        }).store('instance', this);
+            }
+        })
+        .addEvent('click', function(e){
+            e.stopPropagation();
+        })
+        .store('instance', this);
         
         this.parseUI( this.el );
       
@@ -1812,12 +1815,12 @@ MooEditable.UI.Dialog = new Class({
     setContainer: function( container ){
         this.container = container;
         this.overlay = new Element('div', {
-            'class': 'mooeditable-ui-dialog-overlay',
-            style: 'display: none;'
+            'class': 'mooeditable-ui-dialog-overlay'
+        })
+        .addEvent('click', function(e){
+            e.stop();
         })
         .setStyle('opacity', 0.5)
-        .inject( this.container );
-        this.el.inject( this.container );
     },
     
     click: function(){
@@ -1826,8 +1829,8 @@ MooEditable.UI.Dialog = new Class({
     },
     
     open: function(){
-        this.overlay.setStyle('display', '');
-        this.el.setStyle('display', '');
+        this.overlay.inject( this.container );
+        this.el.inject( this.container );
         
         this.position();
         
@@ -1862,8 +1865,9 @@ MooEditable.UI.Dialog = new Class({
     },
     
     close: function(){
-        this.overlay.setStyle('display', 'none');
-        this.el.setStyle('display', 'none');
+
+        this.overlay.dispose();
+        this.el.dispose();
         
         var dialog = this.el.getParent('.mooeditable-container');
         if( dialog ){
