@@ -14,6 +14,7 @@ authors:
 - Olivier Refalo
 - T.J. Leahy
 - MArc Schmidt <marc@kryn.org>
+- Ferdi van der Werf <ferdi@slashdev.nl>
 
 requires:
 - Core/Class.Extras

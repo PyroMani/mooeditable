@@ -11,6 +11,7 @@ authors:
 - Radovan Lozej
 - Ryan Mitchell
 - MArc Schmidt <marc@kryn.org>
+- Ferdi van der Werf <ferdi@slashdev.nl>
 
 requires:
 # - MooEditable
