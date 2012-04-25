@@ -1942,7 +1942,7 @@ MooEditable.UI.PromptDialog = function(questionText, answerText, fn){
 MooEditable.Plugins = {};
 
 MooEditable.Actions = {
-    
+
     bold: {
         title: MooEditable.Locale.get('bold'),
         options: {
