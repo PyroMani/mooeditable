@@ -1297,7 +1297,7 @@ MooEditable.UI.Toolbar = new Class({
                     )){
                         e.stop();
                     }
-                }.bind(this),
+                }.bind(this)
                 //click: function(e){ if(this.lastRange) this.editor.selection.setRange(this.lastRange) }.bind(this)
             }
         });
