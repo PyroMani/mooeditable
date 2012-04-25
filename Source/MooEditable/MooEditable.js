@@ -2142,10 +2142,8 @@ MooEditable.Actions = {
             document.id( this.dialogs.toggleview.alert).getElement('textarea').set('value', this.getContent());
             this.dialogs.toggleview.alert.open();
             this.dialogs.toggleview.alert.addEvent('close', function(e) {
-                if(document.id(e.target).hasClass('dialog-ok-button')) {
-                    // Only change when OK button has been pressed
-                    this.setContent(document.id(this.dialogs.toggleview.alert).getElement('textarea').get('value'));
-                }
+                // Change OK button has been pressed
+                this.setContent(document.id(this.dialogs.toggleview.alert).getElement('textarea').get('value'));
             }.bind(this));
         }
     }
