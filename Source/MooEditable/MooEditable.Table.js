@@ -59,7 +59,11 @@ MooEditable.Locale.define({
     tableClass: 'Class',
     tableType: 'Type',
     tableHeader: 'Header',
+    tableCaption: 'Caption',
+    tableSummary: 'Summary',
     tableCell: 'Cell',
+    tableCellPadding: 'Cell padding',
+    tableCellSpacing: 'Cell spacing',
     tableAlign: 'Align',
     tableAlignNone: 'None',
     tableAlignLeft: 'Left',
@@ -70,6 +74,9 @@ MooEditable.Locale.define({
     tableValignTop: 'Top',
     tableValignMiddle: 'Middle',
     tableValignBottom: 'Bottom',
+    tableBorder: 'Border',
+    tableNoBorder: 'No border',
+    tableDoBorder: 'Border',
     addTable: 'Add Table',
     editTable: 'Edit Table',
     deleteTable: 'Delete Table',
@@ -261,13 +268,53 @@ MooEditable.UI.TableDialog = function(editor, dialog){
             + '</td></tr>';
 
     var html = {
-        tableadd: MooEditable.Locale.get('tableColumns') + ' <input type="text" class="table-c" value="" size="4"> '
-            + MooEditable.Locale.get('tableRows') + ' <input type="text" class="table-r" value="" size="4"> ',
         tableedit: MooEditable.Locale.get('tableWidth') + ' <input type="text" class="table-w" value="" size="4"> '
             + MooEditable.Locale.get('tableClass') + ' <input type="text" class="table-c" value="" size="15"> ',
             
         tablecoledit: '<table width="100%"><tr><td width="90">'+rowColEdit+'</table>'
     };
+
+    html.tableadd = ''
+        + '<table>'
+            + '<tr>'
+                + '<td>' + MooEditable.Locale.get('tableColumns') + '</td>'
+                + '<td><input type="text" class="table-c" value="2" size="4" /></td>'
+                + '<td>' + MooEditable.Locale.get('tableRows') + '</td>'
+                + '<td><input type="text" class="table-r" value="2" size="4" /></td>'
+            + '</tr>'
+            + '<tr>'
+                + '<td>' + MooEditable.Locale.get('tableCellPadding') + '</td>'
+                + '<td><input type="text" class="table-cp" value="" size="4" /></td>'
+                + '<td>' + MooEditable.Locale.get('tableCellSpacing') + '</td>'
+                + '<td><input type="text" class="table-cs" value="" size="4" /></td>'
+            + '</tr>'
+            + '<tr>'
+                + '<td>' + MooEditable.Locale.get('tableAlign') + '</td>'
+                + '<td>'
+                    + '<select class="table-a">'
+                        + '<option value="" selected="selected">' + MooEditable.Locale.get('tableAlignNone') + '</option>'
+                        + '<option value="left">' + MooEditable.Locale.get('tableAlignLeft') + '</option>'
+                        + '<option value="center">' + MooEditable.Locale.get('tableAlignCenter') + '</option>'
+                        + '<option value="right">' + MooEditable.Locale.get('tableAlignRight') + '</option>'
+                    + '</select>'
+                + '</td>'
+                + '<td>' + MooEditable.Locale.get('tableBorder') + '</td>'
+                + '<td>'
+                    + '<select class="table-b">'
+                        + '<option value="0" selected="selected">' + MooEditable.Locale.get('tableNoBorder') + '</option>'
+                        + '<option value="1">' + MooEditable.Locale.get('tableDoBorder') + '</option>'
+                    + '</select>'
+                + '</td>'
+            + '</tr>'
+            + '<tr>'
+                + '<td>' + MooEditable.Locale.get('tableCaption') + '</td>'
+                + '<td colspan="3"><input type="text" class="table-cap" value="" size="30" /></td>'
+            + '</tr>'
+            + '<tr>'
+                + '<td>' + MooEditable.Locale.get('tableSummary') + '</td>'
+                + '<td colspan="3"><input type="text" class="table-sum" value="" size="30" /></td>'
+            + '</tr>'
+        + '</table>';
     
     html.tablerowedit = ''
         + '<table width="100%"><tr><td width="90">'
@@ -281,7 +328,7 @@ MooEditable.UI.TableDialog = function(editor, dialog){
         + '</table>',
     
     html[dialog] += '<div class="mooeditable-dialog-actions">'
-		+'<button class="dialog-button dialog-ok-button">' + MooEditable.Locale.get('ok') + '</button>'
+        + '<button class="dialog-button dialog-ok-button">' + MooEditable.Locale.get('ok') + '</button>'
         + '<button class="dialog-button dialog-cancel-button">' + MooEditable.Locale.get('cancel') + '</button></div>';
         
         
@@ -415,10 +462,30 @@ MooEditable.UI.TableDialog = function(editor, dialog){
             click: function(e){
                 var col = this.el.getElement('.table-c').value.toInt();
                 var row = this.el.getElement('.table-r').value.toInt();
+                var padding = this.el.getElement('.table-cp').value;
+                var spacing = this.el.getElement('.table-cs').value;
+                var align = this.el.getElement('.table-a').value;
+                var caption = this.el.getElement('.table-cap').value;
+                var summary = this.el.getElement('.table-sum').value;
                 if (!(row>0 && col>0)) return;
                 var div, table, tbody, ro = [];
                 div = new Element('tdiv');
-                table = new Element('table').set('border', 0).set('width', '100%').inject(div);
+                table = new Element('table')
+                    .set('border', this.el.getElement('.table-b').value.toInt())
+                    //.set('width', '100%')
+                    .inject(div);
+                // Optionals
+                if(padding != '')
+                    table.set('cellpadding', padding.toInt());
+                if(spacing != '')
+                    table.set('cellspacing', spacing.toInt());
+                if(align != '')
+                    table.set('align', align);
+                if(summary != '')
+                    table.set('summary', summary);
+                if(caption != '')
+                    new Element('caption', { text: caption }).inject(table);
+                // Add table body
                 tbody = new Element('tbody').inject(table);
                 for (var r = 0; r<row; r++){
                     ro[r] = new Element('tr').inject(tbody, 'bottom');
