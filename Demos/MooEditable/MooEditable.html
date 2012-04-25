@@ -2,28 +2,48 @@
 <html>
     <head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<title>MooEditable basic example</title>
+		<title>MooEditable examples</title>
 
 		<style type="text/css">
 			body{
 				font-family: sans-serif;
 				font-size: .9em;
+            	background-color: #f2f2f2;
 			}
-			#textarea-1{
+			#textarea-1, #textarea-2{
 				width: 700px;
 				height: 200px;
 				padding: 10px;
 				border: 2px solid #ddd;
+				margin: 50px;
 			}
 		</style>
 
 		<link rel="stylesheet" type="text/css" href="../../Assets/MooEditable/MooEditable.css">
+		<link rel="stylesheet" type="text/css" href="../../Assets/MooEditable/MooEditable.Extras.css">
+		<link rel="stylesheet" type="text/css" href="../../Assets/MooEditable/MooEditable.SilkTheme.css">
+		<link rel="stylesheet" type="text/css" href="../../Assets/MooEditable/MooEditable.Image.css">
+		<link rel="stylesheet" type="text/css" href="../../Assets/MooEditable/MooEditable.Table.css">
+		
 		<script type="text/javascript" src="../assets/mootools.js"></script>
 		<script type="text/javascript" src="../../Source/MooEditable/MooEditable.js"></script>
+		<script type="text/javascript" src="../../Source/MooEditable/MooEditable.UI.MenuList.js"></script>
+		<script type="text/javascript" src="../../Source/MooEditable/MooEditable.Extras.js"></script>
+		<script type="text/javascript" src="../../Source/MooEditable/MooEditable.Image.js"></script>
+		<script type="text/javascript" src="../../Source/MooEditable/MooEditable.Table.js"></script>
 
 		<script type="text/javascript">
 			window.addEvent('domready', function(){
-				$('textarea-1').mooEditable();
+				$('textarea-1').mooEditable({
+				    extraClass: 'SilkTheme',
+				    //flyingToolbar: true,
+					actions: 'bold italic underline strikethrough | formatBlock justifyleft justifycenter justifyright justifyfull | insertunorderedlist insertorderedlist indent outdent | undo redo | tableadd | createlink unlink | image | toggleview'
+				});
+				
+				$('textarea-2').mooEditable({
+				    extraClass: 'SilkTheme',
+					actions: 'bold italic underline strikethrough | formatBlock justifyleft justifycenter justifyright justifyfull | insertunorderedlist insertorderedlist indent outdent | undo redo | createlink unlink | image | toggleview'
+				});
 
 				// Post submit
 				$('theForm').addEvent('submit', function(e){
@@ -36,15 +56,28 @@
 	</head>
 	<body>
 
-		<h1>MooEditable basic example</h1>
+		<h1>MooEditable examples</h1>
 
 		<form id="theForm" method="post" action="http://form-data.appspot.com/">
 
 			<label for="textarea-1">Textarea 1</label>
-			<textarea id="textarea-1" name="editable1">
-			&lt;p&gt;&lt;strong&gt;This&lt;/strong&gt; is cool!&lt;/p&gt;
+			<textarea id="textarea-1" name="editable">
+			     &lt;p&gt;&lt;strong&gt;This&lt;/strong&gt; is cool!&lt;/p&gt;sssss
+			     &lt;img style="padding-left:25px;" src="http://www.bloggerschmidt.de/images/stories/logo-mootools.gif" /&gt;
+			     &lt;table&gt;
+			         &lt;tr&gt;&lt;td width="50"&gt;Hi&lt;/td&gt;&lt;td&gt;whats&lt;/td&gt;&lt;td&gt;up&lt;/td&gt;&lt;/tr&gt;
+			         &lt;tr&gt;&lt;td width="50"&gt;Hi1&lt;/td&gt;&lt;td&gt;whats&lt;/td&gt;&lt;td&gt;up&lt;/td&gt;&lt;/tr&gt;
+			         &lt;tr&gt;&lt;td width="50"&gt;Hi2&lt;/td&gt;&lt;td&gt;whatsxxxxxxx&lt;/td&gt;&lt;td&gt;up&lt;/td&gt;&lt;/tr&gt;
+			         &lt;tr&gt;&lt;td width="50"&gt;Hi1&lt;/td&gt;&lt;td&gt;whats&lt;/td&gt;&lt;td&gt;up&lt;/td&gt;&lt;/tr&gt;
+			     &lt;/table&gt;
 			</textarea>
 
+            <textarea id="textarea-2" name="editable">
+                &lt;p&gt;Newpaper
+			     &lt;img src="http://www.bloggerschmidt.de/images/stories/logo-mootools.gif" /&gt;
+			     &lt;/p&gt;
+			</textarea>
+            
 			<input type="submit">
 
 		</form>

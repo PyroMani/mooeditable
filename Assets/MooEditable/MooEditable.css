@@ -1,12 +1,31 @@
 .mooeditable-container{
 	position: relative;
-	border: 2px solid #ddd;
 }
 
-.mooeditable-ui-toolbar{
+.mooeditable-ui-toolbar {
 	color: inherit;
-	background-color: #eee;
-	padding: 2px;
+	margin-top: 10px;
+}
+
+.mooeditable-ui-toolbar-flying {
+    position: absolute;
+    width: 450px;
+    left: 0px;
+}
+
+.mooeditable-ui-toolbar-actions {
+	background-color: #f7f7f7;
+    border: 1px solid #aaa;
+    min-height: 27px;
+}
+
+.mooeditable-ui-toolbar-flying .mooeditable-ui-toolbar-actions {
+    box-shadow: 0px 0px 5px gray;
+}
+
+.mooeditable-ui-toolbar-tabs,
+.mooeditable-ui-panebox-buttonsbar {
+    height: 19px;
 }
 
 .mooeditable-ui-toolbar:after{
@@ -27,7 +46,7 @@
 .mooeditable-ui-toolbar .mooeditable-ui-button{
 	cursor: pointer;
 	border: 0;
-	width: auto;
+	width: 20px;
 	height: auto;
 	margin: 2px;
 	padding: 2px;
@@ -49,13 +68,19 @@
 .mooeditable-ui-toolbar .mooeditable-ui-button.active,
 .mooeditable-ui-toolbar .mooeditable-ui-button.onActive{
 	color: inherit;
-	background-color: #ddd;
+	background-color: #ccc;
 }
 
 .mooeditable-ui-toolbar .mooeditable-ui-button:hover,
 .mooeditable-ui-toolbar .mooeditable-ui-button.hover{
 	color: inherit;
 	background-color: #fff;
+}
+
+.mooeditable-ui-toolbar .mooeditable-ui-button.hover:active,
+.mooeditable-ui-toolbar .mooeditable-ui-button.onActive:active,
+.mooeditable-ui-toolbar .mooeditable-ui-button:active {
+    background-color: #aaa;
 }
 
 .mooeditable-ui-toolbar .mooeditable-ui-button.disabled{
@@ -122,12 +147,15 @@
 .mooeditable-ui-toolbar .unlink-item .button-icon{ background-position: 0 -192px; } 
 .mooeditable-ui-toolbar .urlimage-item .button-icon{ background-position: 0 -208px; } 
 
-.mooeditable-iframe{
+.mooeditable-iframe {
 	margin: 0;
 	padding: 0;
 	border: 0;
 	width: 100%;
 	vertical-align: top;
+	outline: 0;
+	overflow: auto;
+	background-color: white;
 }
 
 .mooeditable-textarea{
@@ -139,26 +167,126 @@
 	outline: 0 !important; /* disable focus ring in Safari */
 }
 
-.mooeditable-ui-dialog{
+.mooeditable-ui-dialog {
 	color: inherit;
-	background-color: #ddd;
+	background-color: #f7f7f7;
 	position: absolute;
-	display: block;
 	cursor: default;
 	font-size: 12px;
-	z-index: 100;
-	width: 100%;
+	border: 4px solid #333;
+	
+	-moz-border-radius: 8px;
+	-webkit-border-radius: 8px;
+	
+	border-radius: 8px;
+	padding: 6px;
+	width: 450px;
+	
+    overflow: auto;
+}
+
+.mooeditable-ui-dialog-overlay {
+    background-color: gray;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    bottom: 0px;
+    right: 0px;
+}
+
+.mooeditable-ui-groupbox {
+    border: 1px solid silver;
+    padding: 5px;
+    position: relative;
+    padding-top: 15px;
+    margin-top: 5px;
+}
+
+.mooeditable-ui-groupbox-label {
+    position: absolute;
+    background-color: #f7f7f7;
+    left: 5px;
+    top: -10px;
+    padding: 3px;
+}
+
+.mooeditable-ui-panebox {
+    border: 1px solid silver;
+    padding: 7px;
+    position: relative;
+    margin-top: 24px;
+}
+
+.mooeditable-ui-panebox-buttonsbar {
+    position: absolute;
+    top: -20px;
+    width: 100%;
+}
+
+a.mooeditable-ui-toolbar-tab-button,
+a.mooeditable-ui-toolbar-tab-button:link,
+a.mooeditable-ui-panesbox-button,
+a.mooeditable-ui-panesbox-button:link {
+    text-decoration: none;
+    color: #444;
+    display: block;
+    float: left;
+    border: 1px solid #aaa;
+    border-bottom: 0px;
+    
+    font-size: 12px;
+    cursor: pointer;
+    line-height: 18px;
+    
+    margin-right: 3px;
+    padding: 0px 7px;
+    
+    -moz-border-radius-topleft: 4px;
+    -moz-border-radius-topright: 4px;
+    -webkit-border-top-left-radius: 4px;
+    -webkit-border-top-right-radius: 4px;
+    outline: 0;
+    
+    background-image: -webkit-gradient(linear, left top, left bottom, #f7f7f7, to(#ddd)); 
+    background-image: -webkit-linear-gradient(top, #f7f7f7, #ddd); 
+    background-image:    -moz-linear-gradient(top, #f7f7f7, #ddd); 
+    background-image:     -ms-linear-gradient(top, #f7f7f7, #ddd); 
+    background-image:      -o-linear-gradient(top, #f7f7f7, #ddd); 
+    background-image:         linear-gradient(top, #f7f7f7, #ddd);
+    
+}
+
+
+a.mooeditable-ui-toolbar-tab-button-active,
+a.mooeditable-ui-toolbar-tab-button-active:link,
+a.mooeditable-ui-panesbox-button-active,
+a.mooeditable-ui-panesbox-button-active:link {
+    background-color: #f7f7f7;
+    background-image: none;
+    position: relative;
+    padding-bottom: 1px;
+}
+
+.mooeditable-dialog-actions {
+    padding-top: 6px;
+    margin-top: 6px;
+    text-align: right;
 }
 
 .mooeditable-ui-dialog .dialog-content{
 	padding: 4px 10px;
 }
 
-.mooeditable-ui-dialog .dialog-content *{
+.mooeditable-ui-dialog .dialog-content * {
 	vertical-align: middle;
 }
 
-.mooeditable-ui-dialog input{
+.mooeditable-ui-dialog .dialog-content td {
+    vertical-align: top;
+}
+
+.mooeditable-ui-dialog input,
+.mooeditable-ui-dialog select{
 	margin: 0 8px;
 }
 

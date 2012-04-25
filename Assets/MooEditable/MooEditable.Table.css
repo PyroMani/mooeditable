@@ -50,3 +50,40 @@
 .mooeditable-ui-toolbar .tablecoldelete-item .button-icon {
 	background: transparent url(Other/table-coldelete.png) no-repeat center center;
 }
+
+.mooeditable-ui-toolbar .tabledelete-item .button-icon {
+	background: transparent url(Other/removeformat.png) no-repeat center center;
+}
+
+
+.mooeditable-iframe table {
+    border: 1px solid silver;
+}
+
+.mooeditable-iframe table td,
+.mooeditable-iframe table th {
+    border: 1px dashed silver;
+}
+
+.mooeditable-table-control-cell-row,
+.mooeditable-table-control-cell-table,
+.mooeditable-table-control-cell-col {
+    background-color: silver;
+    cursor: pointer;
+}
+
+
+.mooeditable-table-control-cell-row {
+    width: 20px;
+}
+
+.mooeditable-table-control-cell-row:hover,
+.mooeditable-table-control-cell-table:hover,
+.mooeditable-table-control-cell-col:hover {
+    background-color: #999;
+}
+
+.mooeditable-iframe table .mooeditable-table-control-selected {
+    background-color: #b4d4ff !important;
+    color: black;
+}

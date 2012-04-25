@@ -1,7 +1,7 @@
 MooEditable
 ===========
 
-A simple web-based WYSIWYG editor, written in [MooTools](http://mootools.net/).
+A simple web-based (HTML5) WYSIWYG editor, written in [MooTools](http://mootools.net/).
 
 ![Screenshot](http://cheeaun.github.com/mooeditable/mooeditable-screenshot.png)
 
@@ -13,6 +13,7 @@ Features
 * Tango icons
 * Lightweight
 * Works in [A-graded desktop web browsers](http://developer.yahoo.com/yui/articles/gbs/)
+* HTML5 contentEditable (no IFrame required)
 
 How to Use
 ----------
