@@ -11,6 +11,14 @@
 	background: transparent url(Other/table-rowadd.png) no-repeat center center;
 }
 
+.mooeditable-ui-toolbar .tablerowaddafter-item .button-icon {
+    background: transparent url(Other/table-rowaddafter.png) no-repeat center center;
+}
+
+.mooeditable-ui-toolbar .tablerowaddbefore-item .button-icon {
+    background: transparent url(Other/table-rowaddbefore.png) no-repeat center center;
+}
+
 .mooeditable-ui-toolbar .tablerowedit-item .button-icon {
 	background: transparent url(Other/table-rowedit.png) no-repeat center center;
 }
@@ -34,6 +42,15 @@
 .mooeditable-ui-toolbar .tablecoladd-item .button-icon {
 	background: transparent url(Other/table-coladd.png) no-repeat center center;
 }
+
+.mooeditable-ui-toolbar .tablecoladdafter-item .button-icon {
+    background: transparent url(Other/table-coladdafter.png) no-repeat center center;
+}
+
+.mooeditable-ui-toolbar .tablecoladdbefore-item .button-icon {
+    background: transparent url(Other/table-coladdbefore.png) no-repeat center center;
+}
+
 
 .mooeditable-ui-toolbar .tablecoledit-item .button-icon {
 	background: transparent url(Other/table-coledit.png) no-repeat center center;
