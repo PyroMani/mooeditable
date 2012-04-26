@@ -80,6 +80,7 @@ MooEditable.Locale.define({
     tableDoBorder: 'Border',
     addTable: 'Add Table',
     editTable: 'Edit Table',
+    editTableCell: 'Edit Table Cell',
     deleteTable: 'Delete Table',
     addTableRow: 'Add Table Row',
     addTableRowAfter: 'Add Table Row after',
@@ -218,32 +219,56 @@ MooEditable.Plugins.Table = new Class({
 });
 
 MooEditable.UI.TableDialog = function(editor, dialog){
-    
-    var rowColEdit = '<tr><td>'
-            + MooEditable.Locale.get('tableWidth') + '</td><td>' + ' <input type="text" class="table-w" value="" size="4"> '
-            + '</td></tr><tr><td>'
-            + MooEditable.Locale.get('tableClass') + '</td><td>' + ' <input type="text" class="table-c" value="" size="15"> '
-            + '</td></tr><tr><td>'
-            + MooEditable.Locale.get('tableAlign') + '</td><td>' + ' <select class="table-a">'
+
+    var tableAlign = ''
+        + '<td>' + MooEditable.Locale.get('tableAlign') + '</td>'
+        + '<td>'
+            + '<select class="table-a">'
                 + '<option value="">' + MooEditable.Locale.get('tableAlignNone') + '</option>'
                 + '<option value="left">' + MooEditable.Locale.get('tableAlignLeft') + '</option>'
                 + '<option value="center">' + MooEditable.Locale.get('tableAlignCenter') + '</option>'
                 + '<option value="right">' + MooEditable.Locale.get('tableAlignRight') + '</option>'
-            + '</select> '
-            + '</td></tr><tr><td>'
-            + MooEditable.Locale.get('tableValign') + '</td><td>'+ ' <select class="table-va">'
+            + '</select>'
+        + '</td>';
+    var tableValign = ''
+        + '<td>' + MooEditable.Locale.get('tableValign') + '</td>'
+        + '<td>'
+            + '<select class="table-va">'
                 + '<option value="">' + MooEditable.Locale.get('tableValignNone') + '</option>'
                 + '<option value="top">' + MooEditable.Locale.get('tableValignTop') + '</option>'
                 + '<option value="middle">' + MooEditable.Locale.get('tableValignMiddle') + '</option>'
                 + '<option value="bottom">' + MooEditable.Locale.get('tableValignBottom') + '</option>'
             + '</select>'
-            + '</td></tr>';
+        + '</td>';
+
+    var rowColEdit = ''
+            + '<tr>'
+                + '<td>' + MooEditable.Locale.get('tableWidth') + '</td>'
+                + '<td><input type="text" class="table-w" value="" size="4"></td>'
+            + '</tr>'
+            + '<tr>'
+                + '<td>' + MooEditable.Locale.get('tableClass') + '</td>'
+                + '<td><input type="text" class="table-c" value="" size="15"></td>'
+            + '</tr>'
+            + '<tr>' + tableAlign + '</tr>'
+            + '<tr>' + tableValign + '</tr>'
+            + '<tr>'
+                + '<td>' + MooEditable.Locale.get('tableType') + '</td>'
+                + '<td>'
+                    + '<select class="table-c-type">'
+                        + '<option value="th">' + MooEditable.Locale.get('tableHeader') + '</option>'
+                        + '<option value="td">' + MooEditable.Locale.get('tableCell') + '</option>'
+                    + '</select>'
+                + '</td>'
+            + '</tr>';
 
     var html = {
         tableedit: MooEditable.Locale.get('tableWidth') + ' <input type="text" class="table-w" value="" size="4"> '
             + MooEditable.Locale.get('tableClass') + ' <input type="text" class="table-c" value="" size="15"> ',
             
-        tablecoledit: '<table width="100%"><tr><td width="90">'+rowColEdit+'</table>'
+        tablecoledit: '<table>'+rowColEdit+'</table>',
+        tablerowedit: '<table>'+rowColEdit+'</table>',
+        tablecelledit: '<table>'+rowColEdit+'</table>'
     };
 
     html.tableadd = ''
@@ -261,15 +286,7 @@ MooEditable.UI.TableDialog = function(editor, dialog){
                 + '<td><input type="text" class="table-cs" value="" size="4" /></td>'
             + '</tr>'
             + '<tr>'
-                + '<td>' + MooEditable.Locale.get('tableAlign') + '</td>'
-                + '<td>'
-                    + '<select class="table-a">'
-                        + '<option value="" selected="selected">' + MooEditable.Locale.get('tableAlignNone') + '</option>'
-                        + '<option value="left">' + MooEditable.Locale.get('tableAlignLeft') + '</option>'
-                        + '<option value="center">' + MooEditable.Locale.get('tableAlignCenter') + '</option>'
-                        + '<option value="right">' + MooEditable.Locale.get('tableAlignRight') + '</option>'
-                    + '</select>'
-                + '</td>'
+                + tableAlign
                 + '<td>' + MooEditable.Locale.get('tableBorder') + '</td>'
                 + '<td>'
                     + '<select class="table-b">'
@@ -287,87 +304,55 @@ MooEditable.UI.TableDialog = function(editor, dialog){
                 + '<td colspan="3"><input type="text" class="table-sum" value="" size="30" /></td>'
             + '</tr>'
         + '</table>';
-    
-    html.tablerowedit = ''
-        + '<table width="100%"><tr><td width="90">'
-            + html.tablecoledit
-            + '<tr><td>'
-            + MooEditable.Locale.get('tableType') + '</td><td>' + ' <select class="table-c-type">'
-                + '<option value="th">' + MooEditable.Locale.get('tableHeader') + '</option>'
-                + '<option value="td">' + MooEditable.Locale.get('tableCell') + '</option>'
-            + '</select>'
-            + '</td></tr>'
-        + '</table>',
+
     
     html[dialog] += '<div class="mooeditable-dialog-actions">'
         + '<button class="dialog-button dialog-ok-button">' + MooEditable.Locale.get('ok') + '</button>'
         + '<button class="dialog-button dialog-cancel-button">' + MooEditable.Locale.get('cancel') + '</button></div>';
         
         
-    var colRowEdit ={
+    var colRowEdit = {
         
-        load: function( attributes ){
-    
+        load: function( attributes, type ) {
+
             var node = editor.lastElement;
             if( !node || (node.get('tag') != 'td' && node.get('tag') != 'th') ) node = node.getParent('td');
             if( !node || (node.get('tag') != 'td' && node.get('tag') != 'th') ) node = node.getParent('th');
             
             var values = {};
-            
-            if( node.hasClass('mooeditable-table-control-cell-col') ){
-                
+
+            // Get node values as initial filling of values
+            Object.each(attributes, function(attr) {
+                values[attr] = node.get(attr);
+            });
+
+            if(type == 'col') {
                 var index = parseInt(node.cellIndex);
-                var nextTr = node.getParent();
-                var c;
-                
-                do {
-                    c = nextTr.getChildren('td,th');
-                    if( c[index] && !c[index].hasClass('mooeditable-table-control-cell-col') ){
-                        
-                        if( Object.getLength(values) == 0 ){
-                            //initial
-                            Object.each(attributes, function(attr,el){
-                                values[ attr ] = c[index].get( attr );
-                            }.bind(this));
-                            
-                        } else {
-                            Object.each(attributes, function(attr,el){
-                                if( values[attr] != c[index].get(attr) ){
-                                    values[attr] = "";
-                                }
-                            }.bind(this));
-                        }
+                var trs = node.getParent('table').getFirst('tbody').getChildren('tr');
+                var cell;
+
+                Object.each(trs, function(tr) {
+                    if(typeOf(tr) != 'element') return;
+
+                    cell = tr.getChildren('td,th')[index];
+                    if(cell) {
+                        Object.each(attributes, function(attr) {
+                            if(values[attr] != cell.get(attr))
+                                values[attr] = cell.get(attr);
+                        });
                     }
-                } while( (nextTr = nextTr.getNext()) != null );
-            } else if( node.hasClass('mooeditable-table-control-cell-row') ){
-                
-                var nextTd = node.getParent().getChildren()[1];
-                
-                do {
-                    if( Object.getLength(values) == 0 ){
-                        //initial
-                        Object.each(attributes, function(attr,el){
-                            values[ attr ] = nextTd.get( attr );
-                        }.bind(this));
-                        
-                    } else {
-                        Object.each(attributes, function(attr,el){
-                            if( values[attr] != nextTd.get(attr) ){
-                                values[attr] = "";
-                            }
-                        }.bind(this));
-                    }
-                } while( (nextTd = nextTd.getNext()) != null );
-            
-            } else {                    
-                values = {
-                    'width': node.get('width'),
-                    'class': node.get('class'),
-                    'align': node.get('align'),
-                    'valign': node.get('valign')
-                }
+                });
+            } else if(type == 'row') {
+
+                node.getParent('tr').getChildren('td,tr').each(function(cell) {
+                    Object.each(attributes, function(attr) {
+                        if(values[attr] != cell.get(attr))
+                            values[attr] = cell.get(attr);
+                    });
+                });
+
             }
-            
+
             if( Object.getLength(values) == 0 ) return;
             
             values[ 'class' ] = values[ 'class' ].replace('mooeditable-table-control-selected', '');  
@@ -382,7 +367,7 @@ MooEditable.UI.TableDialog = function(editor, dialog){
             }.bind(this));
         },
         
-        click: function( attributes ){
+        click: function( attributes, type ){
 
             var node = editor.lastElement;
             if( !node || (node.get('tag') != 'td' && node.get('tag') != 'th') ) node = node.getParent('td');
@@ -390,42 +375,54 @@ MooEditable.UI.TableDialog = function(editor, dialog){
             
             var values = {};
             Object.each( attributes, function(attr,el){
-            
-                values[attr] = this.el.getElement('.'+el).value
-            
+                values[attr] = this.el.getElement('.'+el).value;
+                if(values[attr] == '')
+                    values[attr] = null;
             }.bind(this));
-            
-            values['class'] = 'mooeditable-table-control-selected'+(values['class']?' '+values['class']:'');
 
-            if( node.hasClass('mooeditable-table-control-cell-col') ){
-                //selected whole col
+            var toAlter = [];
+
+            if(type == 'col') {
                 var index = parseInt(node.cellIndex);
-                if (node){
-                    var nextTr = node.getParent();
-                    var c;
-                    
-                    do {
-                        c = nextTr.getChildren('td,th');
-                        if( c[index] && !c[index].hasClass('mooeditable-table-control-cell-col') ){
-                            c[index].set(values);
-                        }
-                    
-                    } while( (nextTr = nextTr.getNext()) != null );
-                }
-            } else if( node.hasClass('mooeditable-table-control-cell-row') ){
-                //selected whole row
-                var nextTd = node.getParent().getChildren()[1];
-                
-                do {
-                    nextTd.set( values );
-                } while( (nextTd = nextTd.getNext()) != null );
+                var trs = node.getParent('table').getFirst('tbody').getChildren('tr');
+                var cell;
+
+                Object.each(trs, function(tr) {
+                    if(typeOf(tr) != 'element') return;
+
+                    cell = tr.getChildren('td,th')[index];
+                    if(cell) toAlter.push(cell);
+                });
+            } else if(type == 'row') {
+
+                toAlter.append(node.getParent('tr').getChildren('td,th'));
 
             } else {
-                //selected one cell
-                node.set( values );
+
+                toAlter.push(node);
+
+            }
+
+            if(toAlter.length > 0) {
+                var changeTag = values['tag'];
+                values['tag'] = null;
+                toAlter.each(function(e) {
+                    e.set(values);
+                    if(changeTag) {
+                        if(changeTag != e.get('tag')) {
+                            var n = new Element(changeTag, values);
+                            ['class', 'style', 'html'].each(function(attr) {
+                                n.set(attr, e.get(attr));
+                            });
+                            n.inject(e, 'after');
+                            e.destroy();
+                        }
+                    }
+
+                });
             }
         }
-    }
+    };
         
         
         
@@ -479,54 +476,41 @@ MooEditable.UI.TableDialog = function(editor, dialog){
                 node.className = this.el.getElement('.table-c').value;
             }
         },
-        tablerowedit: {
-            load: function(e){
-                var node = editor.lastElement;
-                if( !node || (node.get('tag') != 'td' && node.get('tag') != 'th') ) node = node.getParent('td');
-                if( !node || (node.get('tag') != 'td' && node.get('tag') != 'th') ) node = node.getParent('th');
+        tablecelledit: {
+            load: function() {
 
-                this.el.getElement('.table-c-type').set('value', node.get('tag'));
-                
-                colRowEdit.load.call(this, {'table-w': 'width', 'table-c': 'class', 'table-a': 'align', 'table-va': 'valign'});
-                
+                colRowEdit.load.call(this, {'table-w': 'width', 'table-c': 'class', 'table-a': 'align', 'table-va': 'valign', 'table-c-type': 'tag'}, 'cell');
+
             },
-            click: function(e){
-                var node = editor.lastElement;
-                if( !node || (node.get('tag') != 'td' && node.get('tag') != 'th') ) node = node.getParent('td');
-                if( !node || (node.get('tag') != 'td' && node.get('tag') != 'th') ) node = node.getParent('th');
-                
-                var tr = node.getParent();
-                
-                colRowEdit.click.call(this, {'table-w': 'width', 'table-c': 'class', 'table-a': 'align', 'table-va': 'valign'});
+            click: function() {
 
-                var cType = this.el.getElement('.table-c-type').value;
-                
-                node.getParent('tr').getElements('td, th').each(function(c){
-                    if( cType != c.get('tag') ){
-                        
-                        var n = new Element( cType );
-                        ['class', 'style', 'html'].each(function(attr){
-                            n.set(attr, c.get(attr));
-                        });
+                colRowEdit.click.call(this, {'table-w': 'width', 'table-c': 'class', 'table-a': 'align', 'table-va': 'valign', 'table-c-type': 'tag'}, 'cell');
 
-                        n.inject( c, 'after' );
-                        c.destroy();
-                    }
-                }, this);
-                
-                if( node.get('tag') != cType ){
-                    editor.lastElement = tr.getChildren()[0];
-                    editor.lastElement.focus();
-                }
+            }
+        },
+        tablerowedit: {
+            load: function(){
+
+                colRowEdit.load.call(this, {'table-w': 'width', 'table-c': 'class', 'table-a': 'align', 'table-va': 'valign', 'table-c-type': 'tag'}, 'row');
+
+            },
+            click: function(){
+
+                colRowEdit.click.call(this, {'table-w': 'width', 'table-c': 'class', 'table-a': 'align', 'table-va': 'valign', 'table-c-type': 'tag'}, 'row');
+
             }
         },
         tablecoledit: {
         
-            load : function(e){
-                colRowEdit.load.call(this, {'table-w': 'width', 'table-c': 'class', 'table-a': 'align', 'table-va': 'valign'});
+            load : function(){
+
+                colRowEdit.load.call(this, {'table-w': 'width', 'table-c': 'class', 'table-a': 'align', 'table-va': 'valign', 'table-c-type': 'tag'}, 'col');
+
             },
-            click: function(e){
-                colRowEdit.click.call(this, {'table-w': 'width', 'table-c': 'class', 'table-a': 'align', 'table-va': 'valign'});
+            click: function(){
+
+                colRowEdit.click.call(this, {'table-w': 'width', 'table-c': 'class', 'table-a': 'align', 'table-va': 'valign', 'table-c-type': 'tag'}, 'col');
+
             }
         }
         
@@ -595,37 +579,48 @@ Object.append(MooEditable.Actions, {
     
 
 
-    tablerowedit:{
+    tablerowedit: {
         title: MooEditable.Locale.get('editTableRow'),
         modify: {
-          tags: ['td', 'th'],
-          withClass: 'mooeditable-table-control-cell-row'
+          tags: ['td','th']
         },
         dialogs: {
-            prompt: function(editor){
+            prompt: function(editor) {
                 return MooEditable.UI.TableDialog(editor, 'tablerowedit');
             }
         },
-        command: function(){
+        command: function() {
             if (this.lastElement.getParent('table')) this.dialogs.tablerowedit.prompt.open();
         }
     },
 
-    tablecoledit:{
+    tablecoledit: {
         title: MooEditable.Locale.get('editTableCol'),
-        modify: function( element,action ){
-            return ((element.get('tag')=='td'||element.get('tag')=='th')
-                &&!element.hasClass('mooeditable-table-control-cell-row')
-                &&!element.hasClass('mooeditable-table-control-cell-table')
-                );
+        modify: {
+            tags: ['td', 'th']
         },
         dialogs: {
-            prompt: function(editor){
+            prompt: function(editor) {
                 return MooEditable.UI.TableDialog(editor, 'tablecoledit');
             }
         },
-        command: function(){
+        command: function() {
             if( this.lastElement.getParent('table') ) this.dialogs.tablecoledit.prompt.open();
+        }
+    },
+
+    tablecelledit: {
+        title: MooEditable.Locale.get('editTableCell'),
+        modify: {
+            tags: ['td','th']
+        },
+        dialogs: {
+            prompt: function(editor) {
+                return MooEditable.UI.TableDialog(editor, 'tablecelledit');
+            }
+        },
+        command: function() {
+            if( this.lastElement.getParent('table') ) this.dialogs.tablecelledit.prompt.open();
         }
     },
 

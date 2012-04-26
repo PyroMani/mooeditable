@@ -7,6 +7,10 @@
 	background: transparent url(Other/table-edit.png) no-repeat center center;
 }
 
+.mooeditable-ui-toolbar .tablecelledit-item .button-icon {
+    background: transparent url(Other/table-celledit.png) no-repeat center center;
+}
+
 .mooeditable-ui-toolbar .tablerowadd-item .button-icon {
 	background: transparent url(Other/table-rowadd.png) no-repeat center center;
 }
