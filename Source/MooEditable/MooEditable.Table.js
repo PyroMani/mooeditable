@@ -224,10 +224,10 @@ MooEditable.UI.TableDialog = function(editor, dialog){
         + '<td>' + MooEditable.Locale.get('tableAlign') + '</td>'
         + '<td>'
             + '<select class="table-a">'
-                + '<option value="">' + MooEditable.Locale.get('tableAlignNone') + '</option>'
-                + '<option value="left">' + MooEditable.Locale.get('tableAlignLeft') + '</option>'
-                + '<option value="center">' + MooEditable.Locale.get('tableAlignCenter') + '</option>'
-                + '<option value="right">' + MooEditable.Locale.get('tableAlignRight') + '</option>'
+                + '<option class="table-an" value="">' + MooEditable.Locale.get('tableAlignNone') + '</option>'
+                + '<option class="table-al" value="left">' + MooEditable.Locale.get('tableAlignLeft') + '</option>'
+                + '<option class="table-ac" value="center">' + MooEditable.Locale.get('tableAlignCenter') + '</option>'
+                + '<option class="table-ar" value="right">' + MooEditable.Locale.get('tableAlignRight') + '</option>'
             + '</select>'
         + '</td>';
     var tableValign = ''
@@ -242,33 +242,32 @@ MooEditable.UI.TableDialog = function(editor, dialog){
         + '</td>';
 
     var rowColEdit = ''
-            + '<tr>'
-                + '<td>' + MooEditable.Locale.get('tableWidth') + '</td>'
-                + '<td><input type="text" class="table-w" value="" size="4"></td>'
-            + '</tr>'
-            + '<tr>'
-                + '<td>' + MooEditable.Locale.get('tableClass') + '</td>'
-                + '<td><input type="text" class="table-c" value="" size="15"></td>'
-            + '</tr>'
-            + '<tr>' + tableAlign + '</tr>'
-            + '<tr>' + tableValign + '</tr>'
-            + '<tr>'
-                + '<td>' + MooEditable.Locale.get('tableType') + '</td>'
-                + '<td>'
-                    + '<select class="table-c-type">'
-                        + '<option value="th">' + MooEditable.Locale.get('tableHeader') + '</option>'
-                        + '<option value="td">' + MooEditable.Locale.get('tableCell') + '</option>'
-                    + '</select>'
-                + '</td>'
-            + '</tr>';
+            + '<table>'
+                + '<tr>'
+                    + '<td>' + MooEditable.Locale.get('tableWidth') + '</td>'
+                    + '<td><input type="text" class="table-w" value="" size="4"></td>'
+                + '</tr>'
+                + '<tr>'
+                    + '<td>' + MooEditable.Locale.get('tableClass') + '</td>'
+                    + '<td><input type="text" class="table-c" value="" size="15"></td>'
+                + '</tr>'
+                + '<tr>' + tableAlign + '</tr>'
+                + '<tr>' + tableValign + '</tr>'
+                + '<tr>'
+                    + '<td>' + MooEditable.Locale.get('tableType') + '</td>'
+                    + '<td>'
+                        + '<select class="table-c-type">'
+                            + '<option value="th">' + MooEditable.Locale.get('tableHeader') + '</option>'
+                            + '<option value="td">' + MooEditable.Locale.get('tableCell') + '</option>'
+                        + '</select>'
+                    + '</td>'
+                + '</tr>'
+            + '</table>';
 
     var html = {
-        tableedit: MooEditable.Locale.get('tableWidth') + ' <input type="text" class="table-w" value="" size="4"> '
-            + MooEditable.Locale.get('tableClass') + ' <input type="text" class="table-c" value="" size="15"> ',
-            
-        tablecoledit: '<table>'+rowColEdit+'</table>',
-        tablerowedit: '<table>'+rowColEdit+'</table>',
-        tablecelledit: '<table>'+rowColEdit+'</table>'
+        tablecoledit: rowColEdit,
+        tablerowedit: rowColEdit,
+        tablecelledit: rowColEdit
     };
 
     html.tableadd = ''
@@ -286,6 +285,10 @@ MooEditable.UI.TableDialog = function(editor, dialog){
                 + '<td><input type="text" class="table-cs" value="" size="4" /></td>'
             + '</tr>'
             + '<tr>'
+                + '<td>' + MooEditable.Locale.get('tableWidth') + '</td>'
+                + '<td><input type="text" class="table-w" value="" size="4" /></td>'
+            + '</tr>'
+            + '<tr>'
                 + tableAlign
                 + '<td>' + MooEditable.Locale.get('tableBorder') + '</td>'
                 + '<td>'
@@ -296,6 +299,10 @@ MooEditable.UI.TableDialog = function(editor, dialog){
                 + '</td>'
             + '</tr>'
             + '<tr>'
+                + '<td>' + MooEditable.Locale.get('tableClass') + '</td>'
+                + '<td colspan="3"><input type="text" class="table-cl" value="" size="30" /></td>'
+            + '</tr>'
+            + '<tr>'
                 + '<td>' + MooEditable.Locale.get('tableCaption') + '</td>'
                 + '<td colspan="3"><input type="text" class="table-cap" value="" size="30" /></td>'
             + '</tr>'
@@ -304,6 +311,8 @@ MooEditable.UI.TableDialog = function(editor, dialog){
                 + '<td colspan="3"><input type="text" class="table-sum" value="" size="30" /></td>'
             + '</tr>'
         + '</table>';
+
+    html.tableedit = html.tableadd;
 
     
     html[dialog] += '<div class="mooeditable-dialog-actions">'
@@ -428,12 +437,22 @@ MooEditable.UI.TableDialog = function(editor, dialog){
         
     var action = {
         tableadd: {
+            load: function(e) {
+                this.el.getElement('.table-cp').set('value', '');
+                this.el.getElement('.table-cs').set('value', '');
+                this.el.getElement('.table-w').set('value', '');
+                this.el.getElement('.table-cl').set('value', '');
+                this.el.getElement('.table-cap').set('value', '');
+                this.el.getElement('.table-sum').set('value', '');
+            },
             click: function(e){
                 var col = this.el.getElement('.table-c').value.toInt();
                 var row = this.el.getElement('.table-r').value.toInt();
                 var padding = this.el.getElement('.table-cp').value;
                 var spacing = this.el.getElement('.table-cs').value;
+                var width = this.el.getElement('.table-w').value;
                 var align = this.el.getElement('.table-a').value;
+                var class_ = this.el.getElement('.table-cl').value;
                 var caption = this.el.getElement('.table-cap').value;
                 var summary = this.el.getElement('.table-sum').value;
                 if (!(row>0 && col>0)) return;
@@ -448,8 +467,12 @@ MooEditable.UI.TableDialog = function(editor, dialog){
                     table.set('cellpadding', padding.toInt());
                 if(spacing != '')
                     table.set('cellspacing', spacing.toInt());
+                if(width != '')
+                    table.set('width', width);
                 if(align != '')
                     table.set('align', align);
+                if(class_ != '')
+                    table.set('class', class_);
                 if(summary != '')
                     table.set('summary', summary);
                 if(caption != '')
@@ -467,13 +490,70 @@ MooEditable.UI.TableDialog = function(editor, dialog){
         tableedit: {
             load: function(e){
                 var node = editor.selection.getNode().getParent('table');
+                this.el.getElement('.table-c')
+                    .set('value', '-')
+                    .set('disabled', 'disabled');
+                this.el.getElement('.table-r')
+                    .set('value', '-')
+                    .set('disabled', 'disabled');
+                this.el.getElement('.table-c').getParent('tr').setStyle('display', 'none');
+
+                this.el.getElement('.table-cp').set('value', node.get('cellpadding'));
+                this.el.getElement('.table-cs').set('value', node.get('cellspacing'));
                 this.el.getElement('.table-w').set('value', node.get('width'));
-                this.el.getElement('.table-c').set('value', node.className);
+
+                var alignEl = this.el.getElement('.table-a');
+                var alignVal = node.get('align');
+                if(alignVal) alignVal = alignVal.toLowerCase(); // In case of uppercase spelling
+                switch(alignVal) {
+                    case 'left':    alignEl.selectedIndex = 1; break;
+                    case 'center':  alignEl.selectedIndex = 2; break;
+                    case 'right':   alignEl.selectedIndex = 3; break;
+                    default:        alignEl.selectedIndex = 0; break;
+                }
+
+                this.el.getElement('.table-b').selectedIndex = node.get('border') ? 1 : 0;
+
+                var cap = node.getElement('caption');
+                if(cap)
+                    this.el.getElement('.table-cap').set('value', cap.get('text'));
+
+                this.el.getElement('.table-cl').set('value', node.className);
+                this.el.getElement('.table-sum').set('value', node.get('summary'));
             },
             click: function(e){
                 var node = editor.selection.getNode().getParent('table');
-                node.set('width', this.el.getElement('.table-w').value);
-                node.className = this.el.getElement('.table-c').value;
+                var padding = this.el.getElement('.table-cp').value;
+                var spacing = this.el.getElement('.table-cs').value;
+                var width = this.el.getElement('.table-w').value;
+                var align = this.el.getElement('.table-a').value;
+                var border = this.el.getElement('.table-b').value;
+                var class_ = this.el.getElement('.table-cl').value;
+                var caption = this.el.getElement('.table-cap').value;
+                var summary = this.el.getElement('.table-sum').value;
+
+                node.set('border', border);
+                if(padding == '')   node.erase('cellpadding');
+                else                node.set('cellpadding', padding);
+                if(spacing == '')   node.erase('cellspacing');
+                else                node.set('cellspacing', spacing);
+                if(width == '')     node.erase('wdith');
+                else                node.set('width', width);
+                if(align == '')     node.erase('align');
+                else                node.set('align', align);
+                if(class_ == '')    node.erase('class');
+                else                node.set('class', class_);
+                if(summary == '')   node.erase('summary');
+                else                node.set('summary', summary);
+
+                var cap = node.getElement('caption');
+                if(caption == '' && cap)
+                    cap.destroy();
+                else if(cap)
+                    cap.set('text', caption);
+                else {
+                    new Element('caption', { text: caption }).inject(node);
+                }
             }
         },
         tablecelledit: {
