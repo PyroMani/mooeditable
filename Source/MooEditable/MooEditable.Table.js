@@ -5,6 +5,8 @@ name: MooEditable.Table
 
 description: Extends MooEditable to insert table with manipulation options.
 
+version: 1.1
+
 license: MIT-style license
 
 authors:
@@ -60,11 +62,7 @@ MooEditable.Locale.define({
     tableClass: 'Class',
     tableType: 'Type',
     tableHeader: 'Header',
-    tableCaption: 'Caption',
-    tableSummary: 'Summary',
     tableCell: 'Cell',
-    tableCellPadding: 'Cell padding',
-    tableCellSpacing: 'Cell spacing',
     tableAlign: 'Align',
     tableAlignNone: 'None',
     tableAlignLeft: 'Left',
@@ -75,12 +73,8 @@ MooEditable.Locale.define({
     tableValignTop: 'Top',
     tableValignMiddle: 'Middle',
     tableValignBottom: 'Bottom',
-    tableBorder: 'Border',
-    tableNoBorder: 'No border',
-    tableDoBorder: 'Border',
     addTable: 'Add Table',
     editTable: 'Edit Table',
-    editTableCell: 'Edit Table Cell',
     deleteTable: 'Delete Table',
     addTableRow: 'Add Table Row',
     addTableRowAfter: 'Add Table Row after',
@@ -95,7 +89,18 @@ MooEditable.Locale.define({
     editTableCol: 'Edit Table Column',
     mergeTableCell: 'Merge Table Cell',
     splitTableCell: 'Split Table Cell',
-    deleteTableCol: 'Delete Table Column'
+    deleteTableCol: 'Delete Table Column',
+    // Added in 1.1
+    tableCaption: 'Caption',
+    tableSummary: 'Summary',
+    tableCellPadding: 'Cell padding',
+    tableCellSpacing: 'Cell spacing',
+    tableBorder: 'Border',
+    tableNoBorder: 'No border',
+    tableDoBorder: 'Border',
+    editTableCell: 'Edit Table Cell',
+    
+    null: ''
 });
 
 MooEditable.Plugins.Table = new Class({
