@@ -907,11 +907,20 @@ Object.append(MooEditable.Actions, {
             
             if (node){
                 var nextTd = node.getNext();
-                
+
                 if( nextTd ){
                     node.set('html', node.get('html')+' '+nextTd.get('html'));
                     node.colSpan += nextTd.colSpan+0;
                     nextTd.destroy();
+                }
+
+                if(node.rowSpan > 1) {
+                    var index = node.cellIndex;
+                    if(!node.getParent().getNext()) return;
+
+                    var tdBelow = node.getParent().getNext().getChildren()[index];
+                    node.set('html', node.get('html')+' '+tdBelow.get('html'));
+                    tdBelow.destroy();
                 }
             }
         }
