@@ -873,12 +873,8 @@ Object.append(MooEditable.Actions, {
     
     tablerowspan:{
         title: MooEditable.Locale.get('mergeTableRow'),
-        modify: function( element, action ){
-            return ((element.get('tag')=='td'||element.get('tag')=='th')
-                &&!element.hasClass('mooeditable-table-control-cell-row')
-                &&!element.hasClass('mooeditable-table-control-cell-col')
-                &&!element.hasClass('mooeditable-table-control-cell-table')
-            );
+        modify: {
+            tags: ['td', 'th']
         },
         command: function(){
             var node = this.selection.getNode();
@@ -901,12 +897,8 @@ Object.append(MooEditable.Actions, {
     
     tablecolspan:{
         title: MooEditable.Locale.get('mergeTableCell'),
-        modify: function( element,action ){
-            return ((element.get('tag')=='td'||element.get('tag')=='th')
-                &&!element.hasClass('mooeditable-table-control-cell-row')
-                &&!element.hasClass('mooeditable-table-control-cell-col')
-                &&!element.hasClass('mooeditable-table-control-cell-table')
-            );
+        modify: {
+            tags: ['td', 'th']
         },
         command: function(){
             var node = this.selection.getNode();
