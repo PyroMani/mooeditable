@@ -883,14 +883,20 @@ Object.append(MooEditable.Actions, {
             
             if (node){
                 var index = node.cellIndex;
-                if( ! node.getParent().getNext() ) return;
-                
-                var tdBelow = node.getParent().getNext().getChildren()[index];
-                if( tdBelow ){
+                var nextTr = node.getParent();
+                for(var i=0; i<node.rowSpan; i++)
+                    nextTr = nextTr.getNext();
+                if(!nextTr) return;
+
+                var colSpan = node.colSpan;
+                var children = nextTr.getChildren();
+                var tdBelow;
+                for(var i=index; i<index+colSpan; i++) {
+                    tdBelow = children[i];
                     node.set('html', node.get('html')+' '+tdBelow.get('html'));
-                    node.rowSpan += tdBelow.rowSpan+0;
                     tdBelow.destroy();
                 }
+                node.rowSpan++;
             }
         }
     },
@@ -916,11 +922,19 @@ Object.append(MooEditable.Actions, {
 
                 if(node.rowSpan > 1) {
                     var index = node.cellIndex;
-                    if(!node.getParent().getNext()) return;
+                    var rowSpan = node.rowSpan;
+                    var nextTr = node.getParent();
+                    var tdBelow;
+                    while(--rowSpan) {
+                        nextTr = nextTr.getNext();
+                        if(!nextTr) continue;
 
-                    var tdBelow = node.getParent().getNext().getChildren()[index];
-                    node.set('html', node.get('html')+' '+tdBelow.get('html'));
-                    tdBelow.destroy();
+                        tdBelow = nextTr.getChildren()[index];
+                        if(tdBelow) {
+                            node.set('html', node.get('html')+' '+tdBelow.get('html'));
+                            tdBelow.destroy();
+                        }
+                    }
                 }
             }
         }
