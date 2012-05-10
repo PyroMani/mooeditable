@@ -827,50 +827,9 @@ Object.append(MooEditable.Actions, {
             if (node) node.getParent().deleteRow(node.rowIndex);
         }
     },
-    
-    
-    /*tablerowsplit:{
-        title: MooEditable.Locale.get('splitTableRow'),
-        modify: function( element, action ){
-            return ((element.get('tag')=='td'||element.get('tag')=='th')
-                &&!element.hasClass('mooeditable-table-control-cell-row')
-                &&!element.hasClass('mooeditable-table-control-cell-col')
-                &&!element.hasClass('mooeditable-table-control-cell-table')
-            );
-        },
-        command: function(){
-            var node = this.selection.getNode();
-            if( !node || (node.get('tag') != 'td' && node.get('tag') != 'th') ) node = node.getParent('td');
-            if( !node || (node.get('tag') != 'td' && node.get('tag') != 'th') ) node = node.getParent('th');
-            
-            if (node){
-                var index = node.cellIndex;
-                var row = node.getParent().rowIndex;
-                if (node.getProperty('rowspan')){
-                    var rows = parseInt(node.getProperty('rowspan'));
-                    for (i=1; i<rows; i++){
-                        node.getParent().getParent().childNodes[row+i].insertCell(index);
-                    }
-                    node.removeProperty('rowspan');
-                }
-            }
-        },
-        states: function(node){
-            if (node.get('tag') != 'td' && node.get('tag') != 'th') return;
-            if (node){
-                if (node.getProperty('rowspan') && parseInt(node.getProperty('rowspan')) > 1){
-                    this.el.addClass('onActive');
-                }
-            }
-        }
-    },
-    */
 
 
 
-
-
-    
     tablerowspan:{
         title: MooEditable.Locale.get('mergeTableRow'),
         modify: {
@@ -900,7 +859,42 @@ Object.append(MooEditable.Actions, {
             }
         }
     },
-    
+
+    tablerowsplit:{
+        title: MooEditable.Locale.get('splitTableRow'),
+        modify: {
+            tags: ['td', 'th']
+        },
+        command: function(){
+            var node = this.selection.getNode();
+            if( !node || (node.get('tag') != 'td' && node.get('tag') != 'th') ) node = node.getParent('td');
+            if( !node || (node.get('tag') != 'td' && node.get('tag') != 'th') ) node = node.getParent('th');
+
+            if (node && node.rowSpan > 1) {
+                node.rowSpan--;
+                var nextTr = node.getParent().getNext();
+                if(nextTr) {
+                    var tdBelow = nextTr.getChildren()[node.cellIndex];
+                    if(tdBelow) {
+                        new Element(node.get('tag'), {
+                            'class': node.get('class'),
+                            colSpan: node.colSpan,
+                            html: '&nbsp;'
+                        }).inject(tdBelow, 'before');
+                    } else {
+                        new Element(node.get('tag'), {
+                            'class': node.get('class'),
+                            colSpan: node.colSpan,
+                            html: '&nbsp;'
+                        }).inject(nextTr);
+                    }
+                }
+            }
+       }
+    },
+
+
+
     tablecolspan:{
         title: MooEditable.Locale.get('mergeTableCell'),
         modify: {
@@ -938,36 +932,27 @@ Object.append(MooEditable.Actions, {
                 }
             }
         }
-    }
+    },
         
-    /*tablecolsplit:{
+    tablecolsplit:{
         title: MooEditable.Locale.get('splitTableCell'),
         modify: {
-          tags: ['td'],
-          withClass: 'mooeditable-table-control-cell-col'
+          tags: ['td', 'th']
         },
         command: function(){
             var node = this.selection.getNode();
-            if (node.get('tag')!='td') node = node.getParent('td');
-            if (node){
-                var index = node.cellIndex + 1;
-                if(node.getProperty('colspan')){
-                    var cols = parseInt(node.getProperty('colspan'));
-                    for (i=1;i<cols;i++){
-                        node.getParent().insertCell(index+i);
-                    }
-                    node.removeProperty('colspan');
-                }
-            }
-        },
-        states: function(node){
-            if (node.get('tag')!='td') return;
-            if (node){
-                if (node.getProperty('colspan') && parseInt(node.getProperty('colspan')) > 1){
-                    this.el.addClass('onActive');
-                }
+            if( !node || (node.get('tag') != 'td' && node.get('tag') != 'th') ) node = node.getParent('td');
+            if( !node || (node.get('tag') != 'td' && node.get('tag') != 'th') ) node = node.getParent('th');
+
+            if(node && node.colSpan > 1) {
+                node.colSpan--;
+                new Element(node.get('tag'), {
+                    'class': node.get('class'),
+                    rowSpan: node.rowSpan,
+                    html: '&nbsp;'
+                }).inject(node, 'after');
             }
         }
-    },*/
+    }
     
 });
